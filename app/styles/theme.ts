@@ -1,28 +1,16 @@
-import { MD3LightTheme as DefaultTheme, MD3DarkTheme, MD3Theme } from "react-native-paper";
-import { colors } from "./colors";
+import { MD3LightTheme as DefaultTheme, MD3Theme } from "react-native-paper";
 
-export const lightTheme: MD3Theme = {
-  ...DefaultTheme,
+export const appTheme: MD3Theme = {
+  ...DefaultTheme, // Base Paper theme
   colors: {
     ...DefaultTheme.colors,
-    primary: colors.primary,
-    background: colors.background,
-    surface: colors.surface,
-    onSurface: colors.text, // Use onSurface for text
-    onPrimary: "#FFFFFF", // Text color for buttons with primary background
+    primary: "#7469B6", // Main brand color
+    background: "#E1AFD1", // App background
+    surface: "#FFE6E6", // Card and input backgrounds
+    onSurface: "#7469B6", // Text color
+    onPrimary: "#FFFFFF", // Text color for buttons
   },
 };
 
-export const darkTheme: MD3Theme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    primary: colors.primary,
-    background: "#121212",
-    surface: "#1E1E1E",
-    onSurface: "#E0E0E0", // Light text on dark background
-    onPrimary: "#FFFFFF",
-  },
-};
 
 

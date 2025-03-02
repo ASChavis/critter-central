@@ -14,11 +14,10 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const user = await login(email, password);
-      Alert.alert("Success", "Login successful!");
-      router.replace(`/users/${user.token}`);
+      await login(email, password);
+      // ✅ No need to manually route, it's handled in AuthContext
     } catch (error) {
-      Alert.alert("Error", error instanceof Error ? error.message : "Login failed");
+      alert(error instanceof Error ? error.message : "Login failed");
     }
   };
 
