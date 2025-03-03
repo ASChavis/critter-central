@@ -1,22 +1,16 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { mockData } from "../data/mockData";
 
-// Define the shape of the data context
-interface DataContextType {
-  data: typeof mockData;
-}
+const DataContext = createContext<{ data: typeof mockData } | undefined>(undefined);
 
-// Create the Context
-const DataContext = createContext<DataContextType | undefined>(undefined);
-
-// Provider Component
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [data] = useState(mockData); // Store the mock data
+  const [data] = useState(mockData); // ✅ Ensure this loads pets correctly
+
+  console.log("✅ DataProvider Loaded:", data); // Debugging
 
   return <DataContext.Provider value={{ data }}>{children}</DataContext.Provider>;
 };
 
-// Custom Hook to use the Context
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {
@@ -24,3 +18,4 @@ export const useData = () => {
   }
   return context;
 };
+
