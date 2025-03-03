@@ -2,15 +2,16 @@ import { createContext, useState, useContext, ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { login as mockLogin } from "../lib/authService";
 import { AuthContextType, User } from "../types/auth";
+import { mockData } from "../data/mockData";
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(mockData.users[0]); // ✅ Ensure this sets the correct user
   const router = useRouter();
 
   const login = async (email: string, password: string): Promise<User> => {
@@ -27,11 +28,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    router.replace("/login"); // Redirect to login after logout
+    router.replace("/login"); // ✅ Redirect to login after logout
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -44,5 +45,6 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
 
 

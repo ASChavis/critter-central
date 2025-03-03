@@ -1,11 +1,14 @@
 export interface User {
   id: string;
+  name: string;
   email: string;
-  token: string;
+  households: string[];
+  token: string; // ✅ Ensure token exists in the User type
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<User>; // ✅ Change return type from void → User
+  setUser: (user: User | null) => void;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
 }

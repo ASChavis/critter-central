@@ -1,30 +1,29 @@
-import { View, FlatList } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Button, Text, List } from "react-native-paper";
-import { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useData } from "../context/DataContext";
 
-export default function HouseholdScreen() {
+export default function HouseholdDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const { data } = useData();
   const router = useRouter();
-  const [pets, setPets] = useState([{ id: "101", name: "Buddy" }]);
+
+  const household = data.households.find((h) => h.id === id);
+  if (!household) return <Text>Household not found.</Text>;
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Button mode="contained" onPress={() => router.push("/modals/add-pet")}>
-        Add Pet
-      </Button>
-
-      <FlatList
-        data={pets}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.name}
-            onPress={() => router.push(`/pets/${item.id}`)}
-            left={(props) => <List.Icon {...props} icon="dog" />}
-          />
-        )}
-      />
+    <View>
+      <Text>🏡 {household.name}</Text>
+      <Text>Address: {household.address}</Text>
+      <Text>Pets:</Text>
+      {household.pets.map((petId) => {
+        const pet = data.pets.find((p) => p.id === petId);
+        return (
+          <TouchableOpacity key={petId} onPress={() => router.push(`/pets/${petId}`)}>
+            <Text>🐾 {pet?.name} ({pet?.species})</Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
+
