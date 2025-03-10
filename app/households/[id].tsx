@@ -1,30 +1,65 @@
 import { View, FlatList } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Button, Text, List } from "react-native-paper";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useData } from "../context/DataContext";
+import { Text, List, ActivityIndicator, Button } from "react-native-paper";
 
-export default function HouseholdScreen() {
-  const { id } = useLocalSearchParams();
+export default function HouseholdDetailsScreen() {
+  const params = useLocalSearchParams();
+  const { data } = useData();
   const router = useRouter();
-  const [pets, setPets] = useState([{ id: "101", name: "Buddy" }]);
+
+  if (!data) return <ActivityIndicator animating={true} size="large" />;
+  if (!data.households || !data.pets)
+    return <Text>No household or pet data found.</Text>;
+
+  const householdId = String(params.id);
+  const household = data.households.find((h) => h.id === householdId);
+
+  if (!household) {
+    console.log(`❌ Household not found for ID: ${householdId}`);
+    return <Text>Household not found.</Text>;
+  }
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Button mode="contained" onPress={() => router.push("/modals/add-pet")}>
-        Add Pet
-      </Button>
+    <View>
+      <Text>🏡 {household.name}</Text>
+      <Text>📍 {household.address}</Text>
+      <Text>Pets:</Text>
 
       <FlatList
-        data={pets}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.name}
-            onPress={() => router.push(`/pets/${item.id}`)}
-            left={(props) => <List.Icon {...props} icon="dog" />}
-          />
-        )}
+        data={household.pets}
+        keyExtractor={(petId) => String(petId)}
+        renderItem={({ item: petId }) => {
+          console.log(`🔍 Looking for pet ID: ${petId}`);
+          if (!data.pets) {
+            console.log("⚠️ ERROR: data.pets is undefined!");
+            return <Text>⚠️ Pets data is missing!</Text>;
+          }
+
+          const pet = data.pets.find((p) => p.id === String(petId));
+
+          return pet ? (
+            <List.Item
+              title={pet.name}
+              description={`${pet.species} - ${pet.breed}`}
+              onPress={() => router.push(`/pets/${String(pet.id)}`)}
+              left={(props) => <List.Icon {...props} icon="paw" />}
+            />
+          ) : (
+            <Text key={String(petId)}>❌ Pet not found for ID: {petId}</Text>
+          );
+        }}
+        ListEmptyComponent={<Text>No pets found.</Text>}
       />
+      <Button
+        mode="contained"
+        onPress={() =>
+          router.push(`/modals/add-pet?householdId=${householdId}`)
+        }
+        style={{ marginVertical: 10 }}
+      >
+        ➕ Add Pet
+      </Button>
     </View>
   );
 }

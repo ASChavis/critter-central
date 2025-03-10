@@ -2,15 +2,13 @@ import { useState } from "react";
 import { View, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "./context/AuthContext";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
-import { globalStyles } from "./styles/globalStyles";
+import { Button, Text, TextInput } from "react-native-paper";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const theme = useTheme(); // Use theme for colors
 
   const handleLogin = async () => {
     try {
@@ -22,10 +20,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={[globalStyles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="headlineMedium" style={[globalStyles.title, { color: theme.colors.onSurface }]}>
-        Login
-      </Text>
+    <View>
+      <Text>Login</Text>
 
       {/* Email Input */}
       <TextInput
@@ -35,7 +31,6 @@ export default function LoginScreen() {
         mode="outlined"
         autoCapitalize="none"
         keyboardType="email-address"
-        style={globalStyles.input}
       />
 
       {/* Password Input */}
@@ -45,14 +40,12 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         mode="outlined"
         secureTextEntry
-        style={globalStyles.input}
       />
 
       {/* Login Button */}
-      <Button mode="contained" onPress={handleLogin} style={globalStyles.button}>
+      <Button mode="contained" onPress={handleLogin}>
         Login
       </Button>
     </View>
   );
 }
-

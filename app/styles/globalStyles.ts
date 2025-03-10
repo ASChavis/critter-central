@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors } from "./colors";
+import colors from "./colors";
 
 export const globalStyles = StyleSheet.create({
   container: {
@@ -39,3 +39,5 @@ export const globalStyles = StyleSheet.create({
   },
 });
 
+// ✅ Add a default export for Expo Router compatibility
+export default globalStyles;

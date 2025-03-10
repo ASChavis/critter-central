@@ -3,3 +3,7 @@ Welcome to our Build Carolina Capstone Project
 This project is built with a front end in React Native and TypeScript.
 
 Expo Router is used for navigation.
+
+Metro Bundler for viewing.
+
+Node package manager.
