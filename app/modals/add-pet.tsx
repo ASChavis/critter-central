@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useData } from "../context/DataContext";
@@ -53,46 +53,34 @@ export default function AddPetModal() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium">Add a New Pet</Text>
+    <View>
+      <Text>Add a New Pet</Text>
 
-      <TextInput label="Pet Name" value={name} onChangeText={setName} style={styles.input} />
-      <TextInput label="Species" value={species} onChangeText={setSpecies} style={styles.input} />
-      <TextInput label="Breed" value={breed} onChangeText={setBreed} style={styles.input} />
+      <TextInput label="Pet Name" value={name} onChangeText={setName} />
+      <TextInput label="Species" value={species} onChangeText={setSpecies} />
+      <TextInput label="Breed" value={breed} onChangeText={setBreed} />
       <TextInput
         label="Age"
         value={age}
         onChangeText={setAge}
         keyboardType="numeric"
-        style={styles.input}
       />
 
-      <Button mode="contained" onPress={handleSubmit} style={styles.button}>
+      <Button mode="contained" onPress={handleSubmit}>
         Add Pet
       </Button>
 
-      <Button mode="outlined" onPress={() => router.back()} style={styles.button}>
+      <Button mode="outlined" onPress={() => router.back()}>
         Cancel
       </Button>
 
-      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={2000}>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2000}
+      >
         ❌ Please fill all fields!
       </Snackbar>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-  input: {
-    marginBottom: 15,
-  },
-  button: {
-    marginTop: 10,
-  },
-});
-

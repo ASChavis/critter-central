@@ -12,5 +12,5 @@ export const appTheme: MD3Theme = {
   },
 };
 
-
-
+// ✅ Add a default export for Expo Router compatibility
+export default appTheme;

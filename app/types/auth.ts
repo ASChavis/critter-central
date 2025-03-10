@@ -12,3 +12,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<User>;
   logout: () => void;
 }
+
+// ✅ Add a default export to satisfy Expo Router
+const authTypes = {};
+export default authTypes;

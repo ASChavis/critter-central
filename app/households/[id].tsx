@@ -1,4 +1,4 @@
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, FlatList } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useData } from "../context/DataContext";
 import { Text, List, ActivityIndicator, Button } from "react-native-paper";
@@ -20,19 +20,11 @@ export default function HouseholdDetailsScreen() {
     return <Text>Household not found.</Text>;
   }
 
-  console.log("🏡 Household ID:", householdId);
-  console.log("🐾 Household Pets:", household.pets);
-  console.log("📋 All Pets Data:", data.pets);
-
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.header}>
-        🏡 {household.name}
-      </Text>
+    <View>
+      <Text>🏡 {household.name}</Text>
       <Text>📍 {household.address}</Text>
-      <Text variant="titleMedium" style={styles.petsHeader}>
-        Pets:
-      </Text>
+      <Text>Pets:</Text>
 
       <FlatList
         data={household.pets}
@@ -41,9 +33,7 @@ export default function HouseholdDetailsScreen() {
           console.log(`🔍 Looking for pet ID: ${petId}`);
           if (!data.pets) {
             console.log("⚠️ ERROR: data.pets is undefined!");
-            return (
-              <Text style={styles.errorText}>⚠️ Pets data is missing!</Text>
-            );
+            return <Text>⚠️ Pets data is missing!</Text>;
           }
 
           const pet = data.pets.find((p) => p.id === String(petId));
@@ -54,12 +44,9 @@ export default function HouseholdDetailsScreen() {
               description={`${pet.species} - ${pet.breed}`}
               onPress={() => router.push(`/pets/${String(pet.id)}`)}
               left={(props) => <List.Icon {...props} icon="paw" />}
-              style={styles.petItem}
             />
           ) : (
-            <Text key={String(petId)} style={styles.errorText}>
-              ❌ Pet not found for ID: {petId}
-            </Text>
+            <Text key={String(petId)}>❌ Pet not found for ID: {petId}</Text>
           );
         }}
         ListEmptyComponent={<Text>No pets found.</Text>}
@@ -76,29 +63,3 @@ export default function HouseholdDetailsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#F8F9FA",
-  },
-  header: {
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  petsHeader: {
-    marginTop: 15,
-    fontWeight: "bold",
-  },
-  petItem: {
-    backgroundColor: "#ffffff",
-    borderRadius: 8,
-    marginVertical: 5,
-    paddingVertical: 5,
-  },
-  errorText: {
-    color: "red",
-    marginVertical: 5,
-  },
-});

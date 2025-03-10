@@ -1,16 +1,28 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { mockData } from "../data/mockData";
+import mockData from "../data/mockData";
 
-const DataContext = createContext<{ data: typeof mockData } | undefined>(undefined);
+// Define the DataContext type
+interface DataContextType {
+  data: typeof mockData;
+  setData: React.Dispatch<React.SetStateAction<typeof mockData>>; // ✅ Allow state updates
+}
+
+// Create context with default values
+const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [data] = useState(mockData); // ✅ Ensure this loads pets correctly
+  const [data, setData] = useState(mockData); // ✅ Store mock data in state
 
   console.log("✅ DataProvider Loaded:", data); // Debugging
 
-  return <DataContext.Provider value={{ data }}>{children}</DataContext.Provider>;
+  return (
+    <DataContext.Provider value={{ data, setData }}>
+      {children}
+    </DataContext.Provider>
+  );
 };
 
+// ✅ Named export for `useData`
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {
@@ -19,3 +31,5 @@ export const useData = () => {
   return context;
 };
 
+// ✅ Default export for Expo Router compatibility
+export default DataProvider;

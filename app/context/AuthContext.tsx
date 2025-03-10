@@ -2,8 +2,9 @@ import { createContext, useState, useContext, ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { login as mockLogin } from "../lib/authService";
 import { AuthContextType, User } from "../types/auth";
-import { mockData } from "../data/mockData";
+import mockData from "../data/mockData";
 
+// ✅ Create AuthContext with proper type safety
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
@@ -11,16 +12,22 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(mockData.users[0]); // ✅ Ensure this sets the correct user
   const router = useRouter();
+
+  // ✅ Ensure the user has a default structure
+  const initialUser: User = {
+    ...mockData.users[0],
+    households: mockData.users[0].households || [], // ✅ Avoids undefined issues
+  };
+
+  const [user, setUser] = useState<User | null>(initialUser);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
       const authenticatedUser = await mockLogin(email, password);
       setUser(authenticatedUser);
       router.replace("/");
-
-      return authenticatedUser; // ✅ Return User instead of void
+      return authenticatedUser;
     } catch (error) {
       throw error;
     }
@@ -28,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    router.replace("/login"); // ✅ Redirect to login after logout
+    router.replace("/login");
   };
 
   return (
@@ -38,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
+// ✅ Provide useAuth Hook for easy access
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -46,5 +54,5 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-
-
+// ✅ Default export to satisfy Expo Router requirements
+export default AuthProvider;
