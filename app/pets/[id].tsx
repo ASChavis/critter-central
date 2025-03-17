@@ -1,5 +1,11 @@
 import { View, FlatList } from "react-native";
-import { Text, ActivityIndicator, Button, List } from "react-native-paper";
+import {
+  Text,
+  ActivityIndicator,
+  Button,
+  List,
+  useTheme,
+} from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useData } from "../context/DataContext";
 
@@ -7,6 +13,7 @@ export default function PetDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { data } = useData();
+  const { colors } = useTheme();
 
   console.log("🔵 Params from useLocalSearchParams:", id);
   console.log("📦 Full Data Object:", data);
@@ -31,7 +38,7 @@ export default function PetDetailsScreen() {
     return <Text style={{ color: "red" }}>❌ Pet not found: {petId}</Text>;
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <Text>🐾 {pet.name}</Text>
       <Text>Species: {pet.species}</Text>
       <Text>Breed: {pet.breed}</Text>

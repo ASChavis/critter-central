@@ -4,10 +4,10 @@ export const appTheme: MD3Theme = {
   ...DefaultTheme, // Base Paper theme
   colors: {
     ...DefaultTheme.colors,
-    primary: "#7469B6", // Main brand color
-    background: "#E1AFD1", // App background
-    surface: "#FFE6E6", // Card and input backgrounds
-    onSurface: "#7469B6", // Text color
+    primary: "#AA60C8", // Main brand color
+    background: "#FFDFEF", // App background
+    surface: "#EABDE6", // Card and input backgrounds
+    onSurface: "#D69ADE", // Text color
     onPrimary: "#FFFFFF", // Text color for buttons
   },
 };

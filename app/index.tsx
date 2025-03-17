@@ -1,7 +1,13 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, FlatList } from "react-native";
-import { Button, List, Text, ActivityIndicator } from "react-native-paper";
+import {
+  Button,
+  List,
+  Text,
+  ActivityIndicator,
+  useTheme,
+} from "react-native-paper";
 import { useAuth } from "./context/AuthContext";
 import { useData } from "./context/DataContext";
 
@@ -17,6 +23,7 @@ export default function HomePage() {
   const router = useRouter();
   const { user } = useAuth();
   const { data } = useData();
+  const { colors } = useTheme();
 
   const [userHouseholds, setUserHouseholds] = useState<Household[]>([]);
   const [isMounted, setIsMounted] = useState(true); // ✅ Track mount state
@@ -51,16 +58,8 @@ export default function HomePage() {
   if (!data || !user) return <Text>Loading...</Text>;
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <Text>Welcome, {user?.email}!</Text>
-
-      <Button
-        mode="contained"
-        onPress={() => router.push("/modals/add-household")}
-      >
-        ➕ Add Household
-      </Button>
-
       <FlatList
         data={userHouseholds}
         keyExtractor={(item) => item.id}
@@ -74,10 +73,15 @@ export default function HomePage() {
         )}
         ListEmptyComponent={<Text>No households found.</Text>}
       />
-
       <Text>Edit Your Account Information</Text>
       <Button mode="text" onPress={() => router.push("/users/1")}>
         View User Info
+      </Button>{" "}
+      <Button
+        mode="contained"
+        onPress={() => router.push("/modals/add-household")}
+      >
+        ➕ Add Household
       </Button>
     </View>
   );

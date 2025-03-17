@@ -2,13 +2,14 @@ import { useState } from "react";
 import { View, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "./context/AuthContext";
-import { Button, Text, TextInput } from "react-native-paper";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const theme = useTheme();
 
   const handleLogin = async () => {
     try {
@@ -20,7 +21,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View>
+    <View style={{}}>
       <Text>Login</Text>
 
       {/* Email Input */}
