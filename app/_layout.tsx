@@ -4,6 +4,7 @@ import { PaperProvider } from "react-native-paper";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { DataProvider } from "./context/DataContext";
+import appTheme from "./styles/theme";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ const RootLayout = () => {
   const isHiddenScreen = segments.includes("login"); // Check if on login page
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={appTheme}>
       <AuthProvider>
         {" "}
         {/* ✅ AuthContext wraps the entire app */}
