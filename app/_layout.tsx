@@ -22,23 +22,26 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 const RootLayout = () => {
   const segments = useSegments();
-  const isHiddenScreen = segments.includes("login"); // Check if on login page
+  const isHiddenScreen = segments.includes("login");
 
   return (
     <PaperProvider theme={appTheme}>
       <AuthProvider>
         {" "}
-        {/* ✅ AuthContext wraps the entire app */}
+        {/* AuthContext wraps the entire app */}
         <DataProvider>
           {" "}
-          {/* ✅ DataProvider inside AuthProvider */}
+          {/* DataProvider inside AuthProvider */}
           <AuthGuard>
             {" "}
-            {/* ✅ Ensures authentication before showing app */}
+            {/*  Ensures authentication before showing app */}
             <View style={{ flex: 1 }}>
               <Stack
                 screenOptions={{
-                  headerShown: !isHiddenScreen, // Hide header on login screen
+                  headerStyle: { backgroundColor: appTheme.colors.primary },
+                  headerTintColor: appTheme.colors.onPrimary,
+                  headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+                  headerShadowVisible: false,
                 }}
               >
                 <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -54,7 +57,6 @@ const RootLayout = () => {
                   name="pets/[id]"
                   options={{ headerTitle: "Pet Details" }}
                 />
-                {/* Modals */}
                 <Stack.Screen
                   name="modals/add-household"
                   options={{

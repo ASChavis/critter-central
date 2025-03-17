@@ -1,9 +1,16 @@
 import { View, FlatList } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useData } from "../context/DataContext";
-import { Text, List, ActivityIndicator, Button } from "react-native-paper";
+import {
+  Text,
+  List,
+  ActivityIndicator,
+  Button,
+  useTheme,
+} from "react-native-paper";
 
 export default function HouseholdDetailsScreen() {
+  const { colors } = useTheme();
   const params = useLocalSearchParams();
   const { data } = useData();
   const router = useRouter();
@@ -21,7 +28,7 @@ export default function HouseholdDetailsScreen() {
   }
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <Text>🏡 {household.name}</Text>
       <Text>📍 {household.address}</Text>
       <Text>Pets:</Text>
