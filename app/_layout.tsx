@@ -27,13 +27,10 @@ const RootLayout = () => {
   return (
     <PaperProvider theme={appTheme}>
       <AuthProvider>
-        {" "}
         {/* AuthContext wraps the entire app */}
         <DataProvider>
-          {" "}
           {/* DataProvider inside AuthProvider */}
           <AuthGuard>
-            {" "}
             {/*  Ensures authentication before showing app */}
             <View style={{ flex: 1 }}>
               <Stack
@@ -56,6 +53,12 @@ const RootLayout = () => {
                 <Stack.Screen
                   name="pets/[id]"
                   options={{ headerTitle: "Pet Details" }}
+                />
+                <Stack.Screen
+                  name="medicalRecords/[id]"
+                  options={{
+                    headerTitle: "View Records",
+                  }}
                 />
                 <Stack.Screen
                   name="modals/add-household"

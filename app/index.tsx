@@ -11,7 +11,6 @@ import {
 import { useAuth } from "./context/AuthContext";
 import { useData } from "./context/DataContext";
 
-// Define Household type
 interface Household {
   id: string;
   name: string;
@@ -26,13 +25,13 @@ export default function HomePage() {
   const { colors } = useTheme();
 
   const [userHouseholds, setUserHouseholds] = useState<Household[]>([]);
-  const [isMounted, setIsMounted] = useState(true); // ✅ Track mount state
+  const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
-    setIsMounted(true); // ✅ Component is mounted
+    setIsMounted(true);
 
     if (user && data) {
-      if (!user || !data) return; // ✅ Prevents accessing undefined properties
+      if (!user || !data) return;
       if (!user.households || !Array.isArray(user.households)) {
         console.log(
           "❌ ERROR: user.households is undefined or not an array!",
@@ -43,15 +42,14 @@ export default function HomePage() {
       const filteredHouseholds = data.households.filter((h) =>
         user.households.includes(h.id)
       );
-      setUserHouseholds(filteredHouseholds); // ✅ Update state properly
+      setUserHouseholds(filteredHouseholds);
 
-      // ✅ Only update state if component is still mounted
       if (isMounted) {
         setUserHouseholds(filteredHouseholds);
       }
     }
 
-    return () => setIsMounted(false); // ✅ Cleanup function to prevent state updates after unmount
+    return () => setIsMounted(false);
   }, [user, data]);
 
   if (!user) return <ActivityIndicator animating={true} size="large" />;

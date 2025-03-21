@@ -1,12 +1,12 @@
 export type MedicalRecord = {
   id: string;
-  petId: string; // ✅ Ensure petId is always a string
+  petId: string;
   description: string;
   date: string;
-  fileUri?: string; // ✅ Optional field for file uploads
-  vet?: string; // ✅ Optional field for manually added records
+  fileUri?: string;
+  vet?: string;
+  updatedAt?: string;
+  origin?: "manual" | "vet-upload";
 };
 
-// ✅ Add a default export to satisfy Expo Router
-const medicalRecordTypes = {};
-export default medicalRecordTypes;
+export default MedicalRecord;

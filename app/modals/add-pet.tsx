@@ -6,10 +6,9 @@ import { useData } from "../context/DataContext";
 
 export default function AddPetModal() {
   const router = useRouter();
-  const { data } = useData();
-  const { householdId } = useLocalSearchParams(); // ✅ Get household ID
+  const { setData, data } = useData(); // ✅ Use setData to update state
+  const { householdId } = useLocalSearchParams();
 
-  // Pet form state
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [breed, setBreed] = useState("");
@@ -22,16 +21,14 @@ export default function AddPetModal() {
       return;
     }
 
-    // Find the household to add the pet to
     const household = data.households.find((h) => h.id === householdId);
     if (!household) {
       console.log(`❌ Household not found for ID: ${householdId}`);
       return;
     }
 
-    // Create new pet object
     const newPet = {
-      id: `pet_${Date.now()}`, // Generate unique ID
+      id: `pet_${Date.now()}`,
       name,
       species,
       breed,
@@ -39,22 +36,26 @@ export default function AddPetModal() {
       medicalRecords: [],
     };
 
-    // ✅ Add the pet to the global pet list
-    data.pets.push(newPet);
-
-    // ✅ Link the pet to the correct household
-    household.pets.push(newPet.id);
+    // ✅ Update state using setData
+    setData((prevData) => ({
+      ...prevData,
+      pets: [...prevData.pets, newPet], // ✅ Add pet to pets array
+      households: prevData.households.map((h) =>
+        h.id === householdId
+          ? { ...h, pets: [...h.pets, newPet.id] } // ✅ Link pet to household
+          : h
+      ),
+    }));
 
     console.log("✅ Pet added:", newPet);
     console.log("🏠 Updated Household:", household);
 
-    // Navigate back
-    router.back();
+    router.back(); // Go back after adding
   };
 
   return (
-    <View>
-      <Text>Add a New Pet</Text>
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 20, fontWeight: "bold" }}>Add a New Pet</Text>
 
       <TextInput label="Pet Name" value={name} onChangeText={setName} />
       <TextInput label="Species" value={species} onChangeText={setSpecies} />

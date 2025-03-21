@@ -7,8 +7,8 @@ import { useAuth } from "../context/AuthContext";
 
 export default function AddHouseholdModal() {
   const router = useRouter();
-  const { data, setData } = useData(); // ✅ Use setData to update state
-  const { user } = useAuth(); // ✅ Get the logged-in user
+  const { data, setData } = useData();
+  const { user } = useAuth();
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -25,21 +25,18 @@ export default function AddHouseholdModal() {
       return;
     }
 
-    // Create new household object
     const newHousehold = {
-      id: `household_${Date.now()}`, // Generate unique ID
+      id: `household_${Date.now()}`,
       name,
       address,
       pets: [],
     };
 
-    // ✅ Update state properly
     setData((prevData) => ({
       ...prevData,
-      households: [...prevData.households, newHousehold], // ✅ Add household correctly
+      households: [...prevData.households, newHousehold],
     }));
 
-    // ✅ Update the user’s households list
     user.households.push(newHousehold.id);
 
     console.log("✅ Household added:", newHousehold);

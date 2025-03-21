@@ -1,4 +1,4 @@
-import { View, FlatList } from "react-native";
+import { View, FlatList, Pressable } from "react-native";
 import {
   Text,
   ActivityIndicator,
@@ -6,7 +6,7 @@ import {
   List,
   useTheme,
 } from "react-native-paper";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { useData } from "../context/DataContext";
 
 export default function PetDetailsScreen() {
@@ -46,18 +46,29 @@ export default function PetDetailsScreen() {
 
       <Text>Medical Records:</Text>
 
-      {/* ✅ Use FlatList for better rendering performance */}
       <FlatList
         data={pet.medicalRecords}
         keyExtractor={(recordId) => recordId}
         renderItem={({ item }) => {
           const record = data.medicalRecords.find((r) => r.id === item);
           return record ? (
-            <List.Item
-              title={record.description}
-              description={`📅 ${record.date}`}
-              left={(props) => <List.Icon {...props} icon="file-document" />}
-            />
+            <Link href={`/medicalRecords/${record.id}`} asChild>
+              <Pressable
+                style={{
+                  padding: 15,
+                  borderBottomWidth: 1,
+                  borderColor: "#ddd",
+                  backgroundColor: "#f8f9fa",
+                  marginBottom: 5,
+                  borderRadius: 5,
+                }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {record.description}
+                </Text>
+                <Text style={{ color: "gray" }}>📅 {record.date}</Text>
+              </Pressable>
+            </Link>
           ) : (
             <Text style={{ color: "red" }}>❌ Record not found</Text>
           );
@@ -65,7 +76,6 @@ export default function PetDetailsScreen() {
         ListEmptyComponent={<Text>No medical records found.</Text>}
       />
 
-      {/* ✅ Button to open the Add Medical Record Modal */}
       <Button
         mode="contained"
         onPress={() =>

@@ -14,7 +14,6 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await login(email, password);
-      // ✅ No need to manually route, it's handled in AuthContext
     } catch (error) {
       alert(error instanceof Error ? error.message : "Login failed");
     }
