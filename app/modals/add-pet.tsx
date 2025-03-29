@@ -36,14 +36,11 @@ export default function AddPetModal() {
       medicalRecords: [],
     };
 
-    // ✅ Update state using setData
     setData((prevData) => ({
       ...prevData,
-      pets: [...prevData.pets, newPet], // ✅ Add pet to pets array
+      pets: [...prevData.pets, newPet],
       households: prevData.households.map((h) =>
-        h.id === householdId
-          ? { ...h, pets: [...h.pets, newPet.id] } // ✅ Link pet to household
-          : h
+        h.id === householdId ? { ...h, pets: [...h.pets, newPet.id] } : h
       ),
     }));
 

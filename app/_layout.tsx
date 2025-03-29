@@ -42,8 +42,9 @@ const RootLayout = () => {
                 }}
               >
                 <Stack.Screen name="login" options={{ headerShown: false }} />
+                <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen
-                  name="index"
+                  name="homepage/[id]"
                   options={{ headerTitle: "Households" }}
                 />
                 <Stack.Screen

@@ -3,7 +3,8 @@ export const mockData = {
     {
       id: "user_1",
       name: "John Doe",
-      email: "john.doe@email.com",
+      email: "test@example.com",
+      password: "test",
       households: ["household_1", "household_2"],
       token: "mock_token_123",
     },
