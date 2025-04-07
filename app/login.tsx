@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { View, Alert, StyleSheet, ImageBackground } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabase/supabase";
 import { Button, Card, Text, TextInput } from "react-native-paper";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -16,7 +15,12 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password);
-      router.replace("/household/[id]");
+      if (user) {
+        router.replace(`/homepage/${user.id}`);
+      } else {
+        console.error("❌ User not found after login");
+        router.replace("/login");
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : "Login failed");
     }
