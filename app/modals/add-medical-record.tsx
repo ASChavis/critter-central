@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View, Image } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useData } from "../context/DataContext";
-import { MedicalRecord } from "../types/types";
+import { useData } from "../../context/DataContext";
+import { MedicalRecord } from "../../types/types";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 

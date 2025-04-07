@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { View, Alert, StyleSheet, ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabase/supabase";
 import { Button, Card, Text, TextInput } from "react-native-paper";
 
 export default function LoginScreen() {
@@ -9,13 +10,17 @@ export default function LoginScreen() {
   const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    setLoading(true);
     try {
       await login(email, password);
+      router.replace("/household/[id]");
     } catch (error) {
       alert(error instanceof Error ? error.message : "Login failed");
     }
+    setLoading(false);
   };
 
   return (
@@ -65,8 +70,19 @@ export default function LoginScreen() {
               mode="contained"
               onPress={handleLogin}
               style={styles.button}
+              loading={loading}
             >
               Login
+            </Button>
+            <Button
+              mode="text"
+              onPress={() => {
+                console.log("✅ NAVIGATING TO SIGNUP");
+                router.push("/signup");
+              }}
+              style={{ marginTop: 12 }}
+            >
+              Don't have an account? Sign Up
             </Button>
           </Card.Content>
         </Card>

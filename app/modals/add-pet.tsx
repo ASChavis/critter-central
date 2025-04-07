@@ -1,74 +1,129 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { Text, TextInput, Button, Snackbar } from "react-native-paper";
+import {
+  Text,
+  TextInput,
+  Button,
+  Snackbar,
+  RadioButton,
+} from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useData } from "../context/DataContext";
+import { useData } from "../../context/DataContext";
+import { subYears, subMonths } from "date-fns"; // 🆕 Helper for date math
 
 export default function AddPetModal() {
   const router = useRouter();
-  const { setData, data } = useData(); // ✅ Use setData to update state
+  const { addPet, refreshData } = useData();
   const { householdId } = useLocalSearchParams();
 
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [breed, setBreed] = useState("");
   const [age, setAge] = useState("");
+  const [ageUnit, setAgeUnit] = useState<"years" | "months">("years"); // 🆕 default to years
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const calculateBirthdate = (age: number, unit: "years" | "months") => {
+    const today = new Date();
+    if (unit === "years") {
+      return subYears(today, age).toISOString().split("T")[0];
+    } else {
+      return subMonths(today, age).toISOString().split("T")[0];
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!name || !species || !breed || !age) {
       setSnackbarVisible(true);
       return;
     }
 
-    const household = data.households.find((h) => h.id === householdId);
-    if (!household) {
-      console.log(`❌ Household not found for ID: ${householdId}`);
+    if (!householdId) {
+      console.log("❌ ERROR: No household ID provided!");
       return;
     }
 
-    const newPet = {
-      id: `pet_${Date.now()}`,
+    setLoading(true);
+
+    const birthdate = calculateBirthdate(Number(age), ageUnit);
+
+    await addPet({
       name,
       species,
       breed,
-      age: Number(age),
-      medicalRecords: [],
-    };
+      birthdate,
+      household_id: String(householdId),
+    });
 
-    setData((prevData) => ({
-      ...prevData,
-      pets: [...prevData.pets, newPet],
-      households: prevData.households.map((h) =>
-        h.id === householdId ? { ...h, pets: [...h.pets, newPet.id] } : h
-      ),
-    }));
+    await refreshData();
 
-    console.log("✅ Pet added:", newPet);
-    console.log("🏠 Updated Household:", household);
+    console.log("✅ Pet added successfully!");
 
-    router.back(); // Go back after adding
+    setLoading(false);
+    router.back();
   };
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>Add a New Pet</Text>
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 16 }}>
+        Add a New Pet
+      </Text>
 
-      <TextInput label="Pet Name" value={name} onChangeText={setName} />
-      <TextInput label="Species" value={species} onChangeText={setSpecies} />
-      <TextInput label="Breed" value={breed} onChangeText={setBreed} />
       <TextInput
-        label="Age"
+        label="Pet Name"
+        value={name}
+        onChangeText={setName}
+        style={{ marginBottom: 12 }}
+      />
+      <TextInput
+        label="Species"
+        value={species}
+        onChangeText={setSpecies}
+        style={{ marginBottom: 12 }}
+      />
+      <TextInput
+        label="Breed"
+        value={breed}
+        onChangeText={setBreed}
+        style={{ marginBottom: 12 }}
+      />
+
+      <TextInput
+        label="Approximate Age"
         value={age}
         onChangeText={setAge}
         keyboardType="numeric"
+        style={{ marginBottom: 12 }}
       />
 
-      <Button mode="contained" onPress={handleSubmit}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}
+      >
+        <RadioButton.Group
+          onValueChange={(newValue) =>
+            setAgeUnit(newValue as "years" | "months")
+          }
+          value={ageUnit}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <RadioButton value="years" />
+            <Text>Years</Text>
+            <RadioButton value="months" />
+            <Text>Months</Text>
+          </View>
+        </RadioButton.Group>
+      </View>
+
+      <Button mode="contained" onPress={handleSubmit} loading={loading}>
         Add Pet
       </Button>
 
-      <Button mode="outlined" onPress={() => router.back()}>
+      <Button
+        mode="outlined"
+        onPress={() => router.back()}
+        style={{ marginTop: 12 }}
+      >
         Cancel
       </Button>
 

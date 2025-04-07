@@ -11,6 +11,11 @@
   "include": [
     "app/**/*",
     "node_modules/@types/react",
-    "node_modules/@types/react-native"
+    "node_modules/@types/react-native",
+    "context/AuthContext.tsx",
+    "lib/supabase",
+    "types/types.ts",
+    "types/auth.ts",
+    "data/mockData.ts"
   ]
 }

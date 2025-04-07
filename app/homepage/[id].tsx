@@ -8,56 +8,54 @@ import {
   ActivityIndicator,
   useTheme,
 } from "react-native-paper";
-import { useAuth } from "../context/AuthContext";
-import { useData } from "../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
+import { useData } from "../../context/DataContext";
+import LoadingScreen from "../loadingScreen";
+import { usePathname } from "expo-router";
 
 interface Household {
   id: string;
   name: string;
   address: string;
   pets: string[];
+  owner_id: string;
 }
 
 export default function HomePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user } = useAuth();
-  const { data } = useData();
+  const { households } = useData();
   const { colors } = useTheme();
 
   const [userHouseholds, setUserHouseholds] = useState<Household[]>([]);
-  const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
-    setIsMounted(true);
-
-    if (user && data) {
-      if (!user || !data) return;
-      if (!user.households || !Array.isArray(user.households)) {
-        console.log(
-          "❌ ERROR: user.households is undefined or not an array!",
-          user
-        );
-        return;
-      }
-      const filteredHouseholds = data.households.filter((h) =>
-        user.households.includes(h.id)
+    if (user && households) {
+      const filteredHouseholds = households.filter(
+        (h) => h.owner_id === user.id
       );
       setUserHouseholds(filteredHouseholds);
-
-      if (isMounted) {
-        setUserHouseholds(filteredHouseholds);
-      }
     }
+  }, [user, households]);
 
-    return () => setIsMounted(false);
-  }, [user, data]);
+  if (user === undefined || households === undefined) {
+    return <LoadingScreen />;
+  }
 
-  if (!user) return <ActivityIndicator animating={true} size="large" />;
-  if (!data || !user) return <Text>Loading...</Text>;
+  if (!user && pathname !== "/login" && pathname !== "/signup") {
+    router.replace("/login");
+    return null;
+  }
+
+  if (!households) {
+    return <Text>Loading households...</Text>;
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Text>Welcome, {user?.name}!</Text>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: 16 }}>
+      <Text style={{ fontSize: 24, marginBottom: 16 }}>Welcome back!</Text>
+
       <FlatList
         data={userHouseholds}
         keyExtractor={(item) => item.id}
@@ -69,17 +67,23 @@ export default function HomePage() {
             left={(props) => <List.Icon {...props} icon="home" />}
           />
         )}
-        ListEmptyComponent={<Text>No households found.</Text>}
+        ListEmptyComponent={<Text>No households found. Add one!</Text>}
       />
-      <Text>Edit Your Account Information</Text>
-      <Button mode="text" onPress={() => router.push("/users/1")}>
-        View User Info
-      </Button>{" "}
+
       <Button
         mode="contained"
         onPress={() => router.push("/modals/add-household")}
+        style={{ marginTop: 16 }}
       >
         ➕ Add Household
+      </Button>
+
+      <Button
+        mode="text"
+        onPress={() => router.push("/users/1")} // Update to real user info page later
+        style={{ marginTop: 8 }}
+      >
+        View Your Account Info
       </Button>
     </View>
   );

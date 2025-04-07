@@ -1,9 +1,9 @@
 import { Stack, useRouter, useSegments } from "expo-router";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 import { PaperProvider } from "react-native-paper";
 import { useEffect } from "react";
 import { View } from "react-native";
-import { DataProvider } from "./context/DataContext";
+import { DataProvider } from "../context/DataContext";
 import appTheme from "./styles/theme";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
 
   useEffect(() => {
-    if (!user && segments[0] !== "login") {
+    const inAuthScreens = segments[0] === "login" || segments[0] === "signup";
+
+    if (!user && !inAuthScreens) {
       router.replace("/login");
     }
   }, [user, segments]);
@@ -46,6 +48,10 @@ const RootLayout = () => {
                 <Stack.Screen
                   name="homepage/[id]"
                   options={{ headerTitle: "Households" }}
+                />
+                <Stack.Screen
+                  name="signup"
+                  options={{ headerTitle: "Create an Account" }}
                 />
                 <Stack.Screen
                   name="households/[id]"
