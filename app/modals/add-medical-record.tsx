@@ -2,19 +2,25 @@ import { useState } from "react";
 import { View, Image } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useData } from "../context/DataContext";
-import { MedicalRecord } from "../types/types";
+import { useData } from "../../context/DataContext";
+import { MedicalRecord } from "../../types/types";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 
-export default function AddMedicalRecordModal() {
+export default function AddMedicalRecordModal({
+  record = null,
+}: {
+  record?: MedicalRecord | null;
+}) {
   const router = useRouter();
   const { data, setData } = useData();
   const { petId } = useLocalSearchParams();
 
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [fileUri, setFileUri] = useState<string | null>(null); // ✅ Ensure fileUri is typed correctly
+  const [description, setDescription] = useState(record?.description || "");
+  const [date, setDate] = useState(record?.date || "");
+  const [fileUri, setFileUri] = useState<string | null>(
+    record?.fileUri || null
+  );
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const handleFileUpload = async () => {
@@ -24,7 +30,7 @@ export default function AddMedicalRecordModal() {
       });
 
       if (!result.canceled && result.assets.length > 0) {
-        setFileUri(result.assets[0].uri);
+        setFileUri(result.assets[0].uri || null);
         console.log("📄 Uploaded File:", result.assets[0].uri);
       }
     } catch (error) {
@@ -45,58 +51,66 @@ export default function AddMedicalRecordModal() {
     });
 
     if (!result.canceled) {
-      setFileUri(result.assets[0].uri);
+      setFileUri(result.assets[0].uri || null);
       console.log("📸 Captured Image:", result.assets[0].uri);
     }
   };
 
   const handleSubmit = () => {
-    if (!description || !date || !fileUri) {
+    if (!description || !date) {
       setSnackbarVisible(true);
       return;
     }
 
-    // ✅ Ensure petId is always a string
     const petIdString = Array.isArray(petId) ? petId[0] : String(petId);
-
-    // ✅ Debugging: Log petId & data structure
     console.log("🔍 Pet ID:", petIdString);
     console.log("📂 Existing Data:", data);
 
-    // ✅ Find the pet and ensure petId is valid
     const pet = data.pets.find((p) => p.id === petIdString);
     if (!pet) {
       console.log(`❌ Pet not found for ID: ${petIdString}`);
       return;
     }
 
-    // ✅ Ensure `fileUri` is either a string or undefined (not null)
-    const safeFileUri = fileUri || undefined;
+    if (record) {
+      const updatedRecords = data.medicalRecords.map((rec) =>
+        rec.id === record?.id
+          ? { ...rec, description, date, ...(fileUri ? { fileUri } : {}) }
+          : rec
+      );
 
-    // ✅ Create a new medical record with correct structure
-    const newRecord: MedicalRecord = {
-      id: `record_${Date.now()}`,
-      petId: petIdString,
-      description,
-      date,
-      fileUri: safeFileUri, // ✅ Ensures fileUri is correctly typed
-    };
+      setData((prevData) => ({
+        ...prevData,
+        medicalRecords: updatedRecords,
+      }));
 
-    console.log("✅ New Record:", newRecord);
+      console.log("✅ Medical Record updated successfully.");
+    } else {
+      const newRecord: MedicalRecord = {
+        id: `record_${Date.now()}`,
+        petId: petIdString,
+        description,
+        date,
+        ...(fileUri ? { fileUri } : {}),
+      };
 
-    // ✅ Ensure pet has a medicalRecords array and update it
-    pet.medicalRecords = [...(pet.medicalRecords || []), newRecord.id];
+      pet.medicalRecords = [...(pet.medicalRecords || []), newRecord.id];
 
-    //   // ✅ Update `setData` with proper type safety
-    //   setData((prevData) => ({
-    //     ...prevData,
-    //     pets: prevData.pets.map((p) =>
-    //       p.id === petIdString ? { ...p, medicalRecords: pet.medicalRecords } : p
-    //     ),
-    //     medicalRecords: [...prevData.medicalRecords, newRecord], // ✅ Ensures correct structure
-    //   }));
+      setData((prevData) => ({
+        ...prevData,
+        medicalRecords: [
+          ...prevData.medicalRecords,
+          {
+            ...newRecord,
+            fileUri: newRecord.fileUri ?? "",
+            vet: newRecord.vet ?? "",
+          },
+        ],
+      }));
 
-    console.log("✅ Medical Record added successfully.");
+      console.log("✅ Medical Record added successfully.");
+    }
+
     router.back();
   };
 

@@ -5,6 +5,7 @@ export const mockUsers: User[] = [
     id: "1",
     name: "Test1",
     email: "test@example.com",
+    password: "test",
     households: [],
     token: "token123",
   },
@@ -12,6 +13,7 @@ export const mockUsers: User[] = [
     id: "2",
     name: "Test2",
     email: "admin@example.com",
+    password: "test",
     households: [],
     token: "admintoken456",
   },
@@ -30,5 +32,4 @@ export const login = async (email: string, password: string): Promise<User> => {
   });
 };
 
-// ✅ Add default export for Expo Router compatibility
 export default { mockUsers, login };

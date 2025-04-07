@@ -2,8 +2,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password: string;
   households: string[];
-  token: string; // ✅ Ensure token exists in the User type
+  token: string;
 }
 
 export interface AuthContextType {
@@ -13,6 +14,5 @@ export interface AuthContextType {
   logout: () => void;
 }
 
-// ✅ Add a default export to satisfy Expo Router
 const authTypes = {};
 export default authTypes;

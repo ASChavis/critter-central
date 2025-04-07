@@ -3,7 +3,8 @@ export const mockData = {
     {
       id: "user_1",
       name: "John Doe",
-      email: "john.doe@email.com",
+      email: "test@example.com",
+      password: "test",
       households: ["household_1", "household_2"],
       token: "mock_token_123",
     },
@@ -45,7 +46,7 @@ export const mockData = {
       species: "Parrot",
       breed: "African Grey",
       age: 7,
-      medicalRecords: [], // ✅ No records yet, but still an array for consistency
+      medicalRecords: [],
     },
   ],
   medicalRecords: [
@@ -54,24 +55,26 @@ export const mockData = {
       petId: "pet_1",
       description: "Annual vaccination",
       date: "2024-01-15",
-      vet: "Dr. Smith, City Vet Clinic", // ✅ Manual entry by vet
+      fileUri: "",
+      vet: "Dr. Smith, City Vet Clinic",
     },
     {
       id: "record_2",
       petId: "pet_2",
       description: "Vaccination Certificate",
       date: "2023-11-10",
-      fileUri: "https://example.com/vaccine.pdf", // ✅ Uploaded file
+      fileUri: "https://example.com/vaccine.pdf",
+      vet: "",
     },
     {
       id: "record_3",
       petId: "pet_2",
       description: "Routine checkup",
       date: "2024-02-10",
-      vet: "Dr. Jones, Happy Paws Vet", // ✅ Another manual entry
+      fileUri: "",
+      vet: "Dr. Jones, Happy Paws Vet",
     },
   ],
 };
 
-// ✅ Add this default export
 export default mockData;

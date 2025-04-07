@@ -2,19 +2,21 @@ import { useState } from "react";
 import { View } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useData } from "../context/DataContext";
-import { useAuth } from "../context/AuthContext";
+import { useData } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabase/supabase";
 
 export default function AddHouseholdModal() {
   const router = useRouter();
-  const { data, setData } = useData(); // ✅ Use setData to update state
-  const { user } = useAuth(); // ✅ Get the logged-in user
+  const { refreshData } = useData(); // use refreshData after insert
+  const { user } = useAuth();
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name || !address) {
       setSnackbarVisible(true);
       return;
@@ -25,41 +27,64 @@ export default function AddHouseholdModal() {
       return;
     }
 
-    // Create new household object
-    const newHousehold = {
-      id: `household_${Date.now()}`, // Generate unique ID
-      name,
-      address,
-      pets: [],
-    };
+    setLoading(true);
 
-    // ✅ Update state properly
-    setData((prevData) => ({
-      ...prevData,
-      households: [...prevData.households, newHousehold], // ✅ Add household correctly
-    }));
+    const { error } = await supabase.from("households").insert([
+      {
+        name,
+        address,
+        owner_id: user.id,
+        pets: [],
+      },
+    ]);
 
-    // ✅ Update the user’s households list
-    user.households.push(newHousehold.id);
+    if (error) {
+      console.error("❌ Error adding household:", error);
+      setLoading(false);
+      return;
+    }
 
-    console.log("✅ Household added:", newHousehold);
-    console.log("🏡 Updated User Households:", user.households);
+    await refreshData();
 
+    console.log("✅ Household added successfully!");
+
+    setLoading(false);
     router.back();
   };
 
   return (
-    <View>
-      <Text variant="headlineMedium">Create a New Household</Text>
+    <View style={{ padding: 16 }}>
+      <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
+        Create a New Household
+      </Text>
 
-      <TextInput label="Household Name" value={name} onChangeText={setName} />
-      <TextInput label="Address" value={address} onChangeText={setAddress} />
+      <TextInput
+        label="Household Name"
+        value={name}
+        onChangeText={setName}
+        style={{ marginBottom: 12 }}
+      />
+      <TextInput
+        label="Address"
+        value={address}
+        onChangeText={setAddress}
+        style={{ marginBottom: 12 }}
+      />
 
-      <Button mode="contained" onPress={handleSubmit}>
+      <Button
+        mode="contained"
+        onPress={handleSubmit}
+        loading={loading}
+        style={{ marginVertical: 8 }}
+      >
         Add Household
       </Button>
 
-      <Button mode="outlined" onPress={() => router.back()}>
+      <Button
+        mode="outlined"
+        onPress={() => router.back()}
+        style={{ marginVertical: 8 }}
+      >
         Cancel
       </Button>
 

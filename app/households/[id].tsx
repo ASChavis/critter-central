@@ -1,6 +1,6 @@
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 import { View, FlatList } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useData } from "../context/DataContext";
 import {
   Text,
   List,
@@ -8,62 +8,73 @@ import {
   Button,
   useTheme,
 } from "react-native-paper";
+import { useAuth } from "../../context/AuthContext";
+import { useData } from "../../context/DataContext";
+import LoadingScreen from "../loadingScreen";
 
 export default function HouseholdDetailsScreen() {
   const { colors } = useTheme();
-  const params = useLocalSearchParams();
-  const { data } = useData();
+  const { households, pets } = useData();
+  const { user } = useAuth();
   const router = useRouter();
+  const { id } = useLocalSearchParams();
 
-  if (!data) return <ActivityIndicator animating={true} size="large" />;
-  if (!data.households || !data.pets)
-    return <Text>No household or pet data found.</Text>;
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+    }
+  }, [user]);
 
-  const householdId = String(params.id);
-  const household = data.households.find((h) => h.id === householdId);
+  if (user === undefined || households === undefined || pets === undefined) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return null; // already redirecting
+  }
+
+  const householdId = String(id);
+  const household = households.find((h) => h.id === householdId);
 
   if (!household) {
     console.log(`❌ Household not found for ID: ${householdId}`);
     return <Text>Household not found.</Text>;
   }
 
+  // Pets for this household
+  const householdPets = pets.filter((p) => p.household_id === household.id);
+
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Text>🏡 {household.name}</Text>
-      <Text>📍 {household.address}</Text>
-      <Text>Pets:</Text>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: 16 }}>
+      <Text style={{ fontSize: 24, marginBottom: 12 }}>
+        🏡 {household.name}
+      </Text>
+      <Text style={{ fontSize: 16, marginBottom: 16 }}>
+        📍 {household.address}
+      </Text>
+
+      <Text style={{ fontSize: 18, marginBottom: 8 }}>Pets:</Text>
 
       <FlatList
-        data={household.pets}
-        keyExtractor={(petId) => String(petId)}
-        renderItem={({ item: petId }) => {
-          console.log(`🔍 Looking for pet ID: ${petId}`);
-          if (!data.pets) {
-            console.log("⚠️ ERROR: data.pets is undefined!");
-            return <Text>⚠️ Pets data is missing!</Text>;
-          }
-
-          const pet = data.pets.find((p) => p.id === String(petId));
-
-          return pet ? (
-            <List.Item
-              title={pet.name}
-              description={`${pet.species} - ${pet.breed}`}
-              onPress={() => router.push(`/pets/${String(pet.id)}`)}
-              left={(props) => <List.Icon {...props} icon="paw" />}
-            />
-          ) : (
-            <Text key={String(petId)}>❌ Pet not found for ID: {petId}</Text>
-          );
-        }}
-        ListEmptyComponent={<Text>No pets found.</Text>}
+        data={householdPets}
+        keyExtractor={(pet) => pet.id}
+        renderItem={({ item: pet }) => (
+          <List.Item
+            title={pet.name}
+            description={`${pet.species} - ${pet.breed}`}
+            onPress={() => router.push(`/pets/${pet.id}`)}
+            left={(props) => <List.Icon {...props} icon="paw" />}
+          />
+        )}
+        ListEmptyComponent={<Text>No pets found for this household.</Text>}
       />
+
       <Button
         mode="contained"
         onPress={() =>
-          router.push(`/modals/add-pet?householdId=${householdId}`)
+          router.push(`/modals/add-pet?householdId=${household.id}`)
         }
-        style={{ marginVertical: 10 }}
+        style={{ marginVertical: 16 }}
       >
         ➕ Add Pet
       </Button>
