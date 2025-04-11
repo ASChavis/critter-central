@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log(`Auth event: ${event}`, session);
         setUser(session?.user ?? null);
       }
     );
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     if (error) throw error;
+    if (data?.user) setUser(data.user);
   };
 
   const logout = async () => {

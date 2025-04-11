@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, FlatList } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -9,6 +9,7 @@ import {
   useTheme,
 } from "react-native-paper";
 import { supabase } from "../../lib/supabase/supabase";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface Household {
   id: string;
@@ -25,26 +26,49 @@ export default function HomePage() {
 
   const [userHouseholds, setUserHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchHouseholds = async () => {
-      const { data, error } = await supabase
-        .from("households")
-        .select("*")
-        .eq("owner_id", id);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchHouseholds = async () => {
+        setLoading(true); // Make sure loading shows while fetching
+        const { data, error } = await supabase
+          .from("households")
+          .select("*")
+          .eq("owner_id", id);
 
-      if (error) {
-        console.error("❌ Error fetching households:", error.message);
-      } else {
-        setUserHouseholds(data || []);
+        if (error) {
+          console.error("❌ Error fetching households:", error.message);
+        } else {
+          setUserHouseholds(data || []);
+        }
+        setLoading(false);
+      };
+
+      if (id) {
+        fetchHouseholds();
       }
-      setLoading(false);
-    };
+    }, [id])
+  );
 
-    if (id) {
-      fetchHouseholds();
+  const handleRefresh = async () => {
+    if (!id) return;
+
+    setRefreshing(true);
+
+    const { data, error } = await supabase
+      .from("households")
+      .select("*")
+      .eq("owner_id", id);
+
+    if (error) {
+      console.error("❌ Error refreshing households:", error.message);
+    } else {
+      setUserHouseholds(data || []);
     }
-  }, [id]);
+
+    setRefreshing(false);
+  };
 
   if (loading) {
     return <ActivityIndicator animating={true} size="large" />;
@@ -68,6 +92,8 @@ export default function HomePage() {
               left={(props) => <List.Icon {...props} icon="home" />}
             />
           )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
           ListFooterComponent={<View style={{ marginBottom: 20 }} />}
         />
       )}
