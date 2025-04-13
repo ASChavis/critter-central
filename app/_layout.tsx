@@ -46,6 +46,10 @@ const RootLayout = () => {
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen
+                  name="homepage/index"
+                  options={{ headerTitle: "Dashboard" }}
+                />
+                <Stack.Screen
                   name="homepage/[id]"
                   options={{ headerTitle: "Households" }}
                 />
@@ -53,10 +57,14 @@ const RootLayout = () => {
                   name="signup"
                   options={{ headerTitle: "Create an Account" }}
                 />
-                <Stack.Screen
+                <Stack.Screen name="households" />
+                <Stack.Screen name="pets" />
+                <Stack.Screen name="medicalRecords" />
+                <Stack.Screen name="users" />
+                {/* <Stack.Screen
                   name="households/[id]"
                   options={{ headerTitle: "Pets in Household" }}
-                />
+                /> */}
                 <Stack.Screen
                   name="pets/[id]"
                   options={{ headerTitle: "Pet Details" }}
@@ -67,22 +75,29 @@ const RootLayout = () => {
                     headerTitle: "View Records",
                   }}
                 />
-                <Stack.Screen
-                  name="modals/add-household"
+                {/* <Stack.Screen
+                  name="households/modals/add"
                   options={{
                     presentation: "modal",
                     headerTitle: "Add Household",
                   }}
-                />
+                /> */}
                 <Stack.Screen
-                  name="modals/add-pet"
+                  name="pets/modals/add"
                   options={{ presentation: "modal", headerTitle: "Add Pet" }}
                 />
                 <Stack.Screen
-                  name="modals/add-medical-record"
+                  name="medicalRecords/modals/add"
                   options={{
                     presentation: "modal",
                     headerTitle: "Add Medical Record",
+                  }}
+                />
+                <Stack.Screen
+                  name="medicalRecords/modals/edit"
+                  options={{
+                    presentation: "modal",
+                    headerTitle: "Edit Medical Record",
                   }}
                 />
               </Stack>

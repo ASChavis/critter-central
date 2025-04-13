@@ -120,7 +120,9 @@ export default function RecordDetailsScreen() {
       </Button>
 
       <Button
-        onPress={() => router.push(`/medicalRecords/edit/${record.id}`)}
+        onPress={() =>
+          router.push(`/medicalRecords/modals/edit?id=${record.id}`)
+        }
         style={{ marginTop: 10 }}
       >
         Edit Record
