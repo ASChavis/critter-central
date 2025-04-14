@@ -2,28 +2,40 @@ import { useState } from "react";
 import { View } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useData } from "../../context/DataContext";
-import { useAuth } from "../../context/AuthContext";
-import { supabase } from "../../lib/supabase/supabase";
+import { useAuth } from "../../../context/AuthContext";
+import { supabase } from "../../../lib/supabase/supabase";
 
 export default function AddHouseholdModal() {
   const router = useRouter();
-  const { refreshData } = useData(); // use refreshData after insert
   const { user } = useAuth();
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    visible: false,
+    message: "",
+    isError: false,
+  });
   const [loading, setLoading] = useState(false);
+  const [shouldCloseAfterToast, setShouldCloseAfterToast] = useState(false);
 
   const handleSubmit = async () => {
     if (!name || !address) {
-      setSnackbarVisible(true);
+      setSnackbar({
+        visible: true,
+        message: "❌ Please fill all fields!",
+        isError: true,
+      });
       return;
     }
 
     if (!user) {
       console.log("❌ ERROR: No user found!");
+      setSnackbar({
+        visible: true,
+        message: "❌ No user found!",
+        isError: true,
+      });
       return;
     }
 
@@ -40,16 +52,38 @@ export default function AddHouseholdModal() {
 
     if (error) {
       console.error("❌ Error adding household:", error);
+      setSnackbar({
+        visible: true,
+        message: `❌ ${error.message || "Failed to add household!"}`,
+        isError: true,
+      });
       setLoading(false);
       return;
     }
 
-    await refreshData();
-
     console.log("✅ Household added successfully!");
 
+    setSnackbar({
+      visible: true,
+      message: "✅ Household added successfully!",
+      isError: false,
+    });
+
+    setShouldCloseAfterToast(true);
+
+    // Clear fields after successful add
+    setName("");
+    setAddress("");
+
     setLoading(false);
-    router.back();
+  };
+
+  const handleSnackbarDismiss = () => {
+    setSnackbar({ ...snackbar, visible: false });
+
+    if (shouldCloseAfterToast) {
+      router.back(); // Close modal AFTER toast
+    }
   };
 
   return (
@@ -75,6 +109,7 @@ export default function AddHouseholdModal() {
         mode="contained"
         onPress={handleSubmit}
         loading={loading}
+        disabled={loading}
         style={{ marginVertical: 8 }}
       >
         Add Household
@@ -83,17 +118,21 @@ export default function AddHouseholdModal() {
       <Button
         mode="outlined"
         onPress={() => router.back()}
+        disabled={loading}
         style={{ marginVertical: 8 }}
       >
         Cancel
       </Button>
 
       <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
+        visible={snackbar.visible}
+        onDismiss={handleSnackbarDismiss}
         duration={2000}
+        style={{
+          backgroundColor: snackbar.isError ? "red" : "green",
+        }}
       >
-        ❌ Please fill all fields!
+        {snackbar.message}
       </Snackbar>
     </View>
   );
