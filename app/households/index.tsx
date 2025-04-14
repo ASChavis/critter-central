@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, FlatList, Alert } from "react-native";
+import { View, FlatList, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import {
   Button,
@@ -22,7 +22,6 @@ interface Household {
 }
 
 export default function HouseholdsPage() {
-  // ✅ Renamed
   const router = useRouter();
   const { user } = useAuth();
   const { colors } = useTheme();
@@ -69,42 +68,53 @@ export default function HouseholdsPage() {
     setRefreshing(false);
   };
 
-  const handleDeleteHousehold = (householdId: string) => {
-    Alert.alert(
-      "Delete Household",
-      "Are you sure you want to delete this household? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase
-              .from("households")
-              .delete()
-              .eq("id", householdId);
+  const handleDeleteHousehold = async (householdId: string) => {
+    const isConfirmed =
+      Platform.OS === "web"
+        ? window.confirm("Are you sure you want to delete this household?")
+        : await new Promise<boolean>((resolve) => {
+            Alert.alert(
+              "Delete Household",
+              "Are you sure you want to delete this household?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                  onPress: () => resolve(false),
+                },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: () => resolve(true),
+                },
+              ],
+              { cancelable: true }
+            );
+          });
 
-            if (error) {
-              console.error("❌ Error deleting household:", error.message);
-              setSnackbar({
-                visible: true,
-                message: "❌ Failed to delete household!",
-                isError: true,
-              });
-            } else {
-              console.log("✅ Household deleted successfully!");
-              setSnackbar({
-                visible: true,
-                message: "✅ Household deleted successfully!",
-                isError: false,
-              });
-              await fetchHouseholds(); // Refresh the list after deletion
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    if (!isConfirmed) return;
+
+    const { error } = await supabase
+      .from("households")
+      .delete()
+      .eq("id", householdId);
+
+    if (error) {
+      console.error("❌ Error deleting household:", error.message);
+      setSnackbar({
+        visible: true,
+        message: "❌ Failed to delete household!",
+        isError: true,
+      });
+    } else {
+      console.log("✅ Household deleted successfully!");
+      await fetchHouseholds();
+      setSnackbar({
+        visible: true,
+        message: "✅ Household deleted successfully!",
+        isError: false,
+      });
+    }
   };
 
   if (loading) {
@@ -133,7 +143,7 @@ export default function HouseholdsPage() {
                     compact
                     mode="text"
                     onPress={() =>
-                      router.push(`/modals/edit-household?id=${item.id}`)
+                      router.push(`/households/modals/edit?id=${item.id}`)
                     }
                   >
                     ✏️
@@ -158,7 +168,7 @@ export default function HouseholdsPage() {
 
       <Button
         mode="contained"
-        onPress={() => router.push("/modals/add")}
+        onPress={() => router.push("/households/modals/add")}
         style={{ marginTop: 16 }}
       >
         ➕ Add Household

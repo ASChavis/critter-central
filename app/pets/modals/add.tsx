@@ -361,7 +361,7 @@ export default function AddPetModal() {
 
       <Button
         mode="outlined"
-        onPress={() => router.back()}
+        onPress={() => router.push(`/households/${householdId}`)}
         disabled={loading}
         style={{ marginVertical: 8 }}
       >

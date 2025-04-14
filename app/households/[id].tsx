@@ -1,83 +1,175 @@
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
-import { View, FlatList } from "react-native";
+import { useEffect, useState } from "react";
+import { View, FlatList, Alert } from "react-native";
 import {
   Text,
   List,
   ActivityIndicator,
   Button,
-  useTheme,
+  Snackbar,
 } from "react-native-paper";
-import { useAuth } from "../../context/AuthContext";
-import { useData } from "../../context/DataContext";
-import LoadingScreen from "../loadingScreen";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { supabase } from "../../lib/supabase/supabase";
+
+interface Pet {
+  id: string;
+  name: string;
+  breed: string;
+  birthdate: string;
+}
 
 export default function HouseholdDetailsScreen() {
-  const { colors } = useTheme();
-  const { households, pets } = useData();
-  const { user } = useAuth();
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    visible: false,
+    message: "",
+    isError: false,
+  });
+
+  const fetchPets = async () => {
+    if (!id) return;
+
+    const { data, error } = await supabase
+      .from("pets")
+      .select("*")
+      .eq("household_id", id);
+
+    if (error) {
+      console.error("❌ Error fetching pets:", error.message);
+    } else {
+      setPets(data || []);
+    }
+  };
 
   useEffect(() => {
-    if (!user) {
-      router.replace("/login");
-    }
-  }, [user]);
+    const load = async () => {
+      setLoading(true);
+      await fetchPets();
+      setLoading(false);
+    };
 
-  if (user === undefined || households === undefined || pets === undefined) {
-    return <LoadingScreen />;
+    load();
+  }, [id]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPets();
+    setRefreshing(false);
+  };
+
+  const handleDeletePet = (petId: string) => {
+    Alert.alert(
+      "Delete Pet",
+      "Are you sure you want to delete this pet? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const { error } = await supabase
+              .from("pets")
+              .delete()
+              .eq("id", petId);
+
+            if (error) {
+              console.error("❌ Error deleting pet:", error.message);
+              setSnackbar({
+                visible: true,
+                message: "❌ Failed to delete pet!",
+                isError: true,
+              });
+            } else {
+              console.log("✅ Pet deleted successfully!");
+              setSnackbar({
+                visible: true,
+                message: "✅ Pet deleted successfully!",
+                isError: false,
+              });
+              await fetchPets();
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  if (loading) {
+    return <ActivityIndicator animating={true} size="large" />;
   }
-
-  if (!user) {
-    return null; // already redirecting
-  }
-
-  const householdId = String(id);
-  const household = households.find((h) => h.id === householdId);
-
-  if (!household) {
-    console.log(`❌ Household not found for ID: ${householdId}`);
-    return <Text>Household not found.</Text>;
-  }
-
-  // Pets for this household
-  const householdPets = pets.filter((p) => p.household_id === household.id);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, padding: 16 }}>
-      <Text style={{ fontSize: 24, marginBottom: 12 }}>
-        🏡 {household.name}
-      </Text>
-      <Text style={{ fontSize: 16, marginBottom: 16 }}>
-        📍 {household.address}
+    <View style={{ flex: 1, padding: 16 }}>
+      <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
+        Household Details
       </Text>
 
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Pets:</Text>
-
-      <FlatList
-        data={householdPets}
-        keyExtractor={(pet) => pet.id}
-        renderItem={({ item: pet }) => (
-          <List.Item
-            title={pet.name}
-            description={`${pet.species} - ${pet.breed}`}
-            onPress={() => router.push(`/pets/${pet.id}`)}
-            left={(props) => <List.Icon {...props} icon="paw" />}
-          />
-        )}
-        ListEmptyComponent={<Text>No pets found for this household.</Text>}
-      />
+      {pets.length === 0 ? (
+        <Text>No pets found for this household.</Text>
+      ) : (
+        <FlatList
+          data={pets}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <List.Item
+              title={item.name}
+              description={`Breed: ${item.breed}\nBirthdate: ${item.birthdate}`}
+              onPress={() => router.push(`/pets/${item.id}`)}
+              left={(props) => <List.Icon {...props} icon="paw" />}
+              right={() => (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Button
+                    compact
+                    mode="text"
+                    onPress={() =>
+                      router.push(`/pets/modals/edit?id=${item.id}`)
+                    }
+                  >
+                    ✏️
+                  </Button>
+                  <Button
+                    compact
+                    mode="text"
+                    onPress={() => handleDeletePet(item.id)}
+                  >
+                    🗑️
+                  </Button>
+                </View>
+              )}
+              style={{ marginBottom: 8 }}
+            />
+          )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          ListFooterComponent={<View style={{ marginBottom: 20 }} />}
+        />
+      )}
 
       <Button
         mode="contained"
-        onPress={() =>
-          router.push(`/modals/add-pet?householdId=${household.id}`)
-        }
-        style={{ marginVertical: 16 }}
+        onPress={() => router.push(`/pets/modals/add?householdId=${id}`)}
+        style={{ marginTop: 16 }}
       >
         ➕ Add Pet
       </Button>
+
+      {/* Snackbar Toast */}
+      <Snackbar
+        visible={snackbar.visible}
+        onDismiss={() =>
+          setSnackbar({ visible: false, message: "", isError: false })
+        }
+        duration={2000}
+        style={{
+          backgroundColor: snackbar.isError ? "red" : "green",
+        }}
+      >
+        {snackbar.message}
+      </Snackbar>
     </View>
   );
 }
