@@ -7,18 +7,20 @@ import {
   Image,
   Pressable,
   ActivityIndicator,
+  Alert,
+  Platform,
 } from "react-native";
-import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../../lib/supabase/supabase";
-import { useTheme, Button } from "react-native-paper";
+import { useTheme, Button, Snackbar } from "react-native-paper";
+import * as WebBrowser from "expo-web-browser";
 
 interface MedicalRecord {
   id: string;
   pet_id: string;
-  date: string;
+  date_of_record: string;
   description: string;
   vet?: string;
-  fileUri?: string;
+  file_url?: string;
 }
 
 export default function RecordDetailsScreen() {
@@ -28,6 +30,11 @@ export default function RecordDetailsScreen() {
 
   const [record, setRecord] = useState<MedicalRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState({
+    visible: false,
+    message: "",
+    isError: false,
+  });
 
   const recordId = String(id);
 
@@ -55,9 +62,57 @@ export default function RecordDetailsScreen() {
   }, [recordId]);
 
   const handleViewFile = () => {
-    if (!record?.fileUri) return;
-    if (record.fileUri.endsWith(".pdf")) {
-      WebBrowser.openBrowserAsync(record.fileUri);
+    if (!record?.file_url) return;
+    if (record.file_url.endsWith(".pdf")) {
+      WebBrowser.openBrowserAsync(record.file_url);
+    }
+  };
+
+  const handleDelete = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this record?"
+      );
+      if (confirmed) {
+        deleteRecord();
+      }
+    } else {
+      Alert.alert(
+        "Delete Record",
+        "Are you sure you want to delete this medical record?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Delete", style: "destructive", onPress: deleteRecord },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const deleteRecord = async () => {
+    const { error } = await supabase
+      .from("medical_records")
+      .delete()
+      .eq("id", recordId);
+
+    if (error) {
+      console.error("❌ Error deleting record:", error.message);
+      setSnackbar({
+        visible: true,
+        message: "❌ Failed to delete record.",
+        isError: true,
+      });
+    } else {
+      console.log("✅ Record deleted successfully.");
+      setSnackbar({
+        visible: true,
+        message: "✅ Record deleted successfully.",
+        isError: false,
+      });
+
+      setTimeout(() => {
+        router.back();
+      }, 1500);
     }
   };
 
@@ -81,7 +136,7 @@ export default function RecordDetailsScreen() {
       </Text>
 
       <Text style={{ fontSize: 18, marginBottom: 5 }}>
-        📅 Date: {record.date}
+        📅 Date: {record.date_of_record}
       </Text>
 
       {record.vet && (
@@ -90,12 +145,12 @@ export default function RecordDetailsScreen() {
         </Text>
       )}
 
-      {record.fileUri ? (
-        record.fileUri.endsWith(".jpg") ||
-        record.fileUri.endsWith(".jpeg") ||
-        record.fileUri.endsWith(".png") ? (
+      {record.file_url ? (
+        record.file_url.endsWith(".jpg") ||
+        record.file_url.endsWith(".jpeg") ||
+        record.file_url.endsWith(".png") ? (
           <Image
-            source={{ uri: record.fileUri }}
+            source={{ uri: record.file_url }}
             style={{
               width: "100%",
               height: 300,
@@ -120,13 +175,37 @@ export default function RecordDetailsScreen() {
       </Button>
 
       <Button
+        mode="contained"
         onPress={() =>
           router.push(`/medicalRecords/modals/edit?id=${record.id}`)
         }
         style={{ marginTop: 10 }}
       >
-        Edit Record
+        ✏️ Edit Record
       </Button>
+
+      <Button
+        mode="outlined"
+        onPress={handleDelete}
+        style={{ marginTop: 10 }}
+        textColor="red"
+      >
+        🗑️ Delete Record
+      </Button>
+
+      <Snackbar
+        visible={snackbar.visible}
+        onDismiss={() =>
+          setSnackbar({ visible: false, message: "", isError: false })
+        }
+        duration={2000}
+        style={{
+          backgroundColor: snackbar.isError ? "red" : "green",
+          margin: 16,
+        }}
+      >
+        {snackbar.message}
+      </Snackbar>
     </ScrollView>
   );
 }

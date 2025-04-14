@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Image, ScrollView, Platform } from "react-native";
 import {
   Text,
@@ -13,14 +13,14 @@ import { supabase } from "../../../lib/supabase/supabase";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 
-export default function AddMedicalRecordModal() {
+export default function EditMedicalRecordModal() {
   const router = useRouter();
-  const { petId } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const { colors } = useTheme();
 
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
-  const [fileUri, setFileUri] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
@@ -30,6 +30,30 @@ export default function AddMedicalRecordModal() {
   });
   const [loading, setLoading] = useState(false);
 
+  const recordId = Array.isArray(id) ? id[0] : String(id);
+
+  useEffect(() => {
+    const fetchRecord = async () => {
+      const { data, error } = await supabase
+        .from("medical_records")
+        .select("*")
+        .eq("id", recordId)
+        .single();
+
+      if (error) {
+        console.error("❌ Error fetching record:", error.message);
+      } else if (data) {
+        setDescription(data.description || "");
+        setDate(data.date_of_record || "");
+        setFileUrl(data.file_url || null);
+      }
+    };
+
+    if (recordId) {
+      fetchRecord();
+    }
+  }, [recordId]);
+
   const handleFileUpload = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -37,7 +61,7 @@ export default function AddMedicalRecordModal() {
       });
 
       if (!result.canceled && result.assets.length > 0) {
-        setFileUri(result.assets[0].uri);
+        setFileUrl(result.assets[0].uri);
         console.log("📄 Uploaded File:", result.assets[0].uri);
       }
     } catch (error) {
@@ -58,7 +82,7 @@ export default function AddMedicalRecordModal() {
     });
 
     if (!result.canceled) {
-      setFileUri(result.assets[0].uri);
+      setFileUrl(result.assets[0].uri);
       console.log("📸 Captured Image:", result.assets[0].uri);
     }
   };
@@ -73,26 +97,24 @@ export default function AddMedicalRecordModal() {
       return;
     }
 
-    const petIdString = Array.isArray(petId) ? petId[0] : String(petId);
-
     setLoading(true);
 
-    const { error } = await supabase.from("medical_records").insert([
-      {
-        pet_id: petIdString,
+    const { error } = await supabase
+      .from("medical_records")
+      .update({
         description,
         date_of_record: date,
-        fileUri: fileUri || null,
-      },
-    ]);
+        file_url: fileUrl,
+      })
+      .eq("id", recordId);
 
     setLoading(false);
 
     if (error) {
-      console.error("❌ Error adding record:", error.message);
+      console.error("❌ Error updating record:", error.message);
       setSnackbar({
         visible: true,
-        message: "❌ Failed to add record. Please try again.",
+        message: "❌ Failed to update record. Please try again.",
         isError: true,
       });
       return;
@@ -100,7 +122,7 @@ export default function AddMedicalRecordModal() {
 
     setSnackbar({
       visible: true,
-      message: "✅ Medical record added successfully!",
+      message: "✅ Record updated successfully!",
       isError: false,
     });
 
@@ -128,7 +150,7 @@ export default function AddMedicalRecordModal() {
       style={{ flex: 1, padding: 16, backgroundColor: colors.background }}
     >
       <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
-        Add Medical Record
+        ✏️ Edit Medical Record
       </Text>
 
       <TextInput
@@ -138,7 +160,6 @@ export default function AddMedicalRecordModal() {
         style={{ marginBottom: 12 }}
       />
 
-      {/* 📅 Date Input */}
       {Platform.OS === "web" ? (
         <TextInput
           label="Date (YYYY-MM-DD)"
@@ -168,7 +189,6 @@ export default function AddMedicalRecordModal() {
         </>
       )}
 
-      {/* 📄 File Upload / 📸 Take Photo */}
       <Button
         mode="outlined"
         onPress={handleFileUpload}
@@ -185,10 +205,9 @@ export default function AddMedicalRecordModal() {
         📸 Take a Picture
       </Button>
 
-      {/* 📸 Preview */}
-      {fileUri ? (
+      {fileUrl ? (
         <Image
-          source={{ uri: fileUri }}
+          source={{ uri: fileUrl }}
           style={{ width: "100%", height: 200, marginBottom: 16 }}
           resizeMode="contain"
         />
@@ -198,7 +217,6 @@ export default function AddMedicalRecordModal() {
         </Text>
       )}
 
-      {/* ✅ Save / ❌ Cancel */}
       <Button
         mode="contained"
         onPress={handleSubmit}
@@ -206,7 +224,7 @@ export default function AddMedicalRecordModal() {
         disabled={loading}
         style={{ marginBottom: 12 }}
       >
-        ✅ Save Record
+        ✅ Save Changes
       </Button>
 
       <Button

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, FlatList, Alert } from "react-native";
+import { View, FlatList, Alert, Platform } from "react-native";
 import {
   Text,
   List,
@@ -61,41 +61,49 @@ export default function HouseholdDetailsScreen() {
   };
 
   const handleDeletePet = (petId: string) => {
-    Alert.alert(
-      "Delete Pet",
-      "Are you sure you want to delete this pet? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase
-              .from("pets")
-              .delete()
-              .eq("id", petId);
-
-            if (error) {
-              console.error("❌ Error deleting pet:", error.message);
-              setSnackbar({
-                visible: true,
-                message: "❌ Failed to delete pet!",
-                isError: true,
-              });
-            } else {
-              console.log("✅ Pet deleted successfully!");
-              setSnackbar({
-                visible: true,
-                message: "✅ Pet deleted successfully!",
-                isError: false,
-              });
-              await fetchPets();
-            }
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this pet? This action cannot be undone."
+      );
+      if (confirmed) {
+        deletePet(petId);
+      }
+    } else {
+      Alert.alert(
+        "Delete Pet",
+        "Are you sure you want to delete this pet? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => deletePet(petId),
           },
-        },
-      ],
-      { cancelable: true }
-    );
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const deletePet = async (petId: string) => {
+    const { error } = await supabase.from("pets").delete().eq("id", petId);
+
+    if (error) {
+      console.error("❌ Error deleting pet:", error.message);
+      setSnackbar({
+        visible: true,
+        message: "❌ Failed to delete pet!",
+        isError: true,
+      });
+    } else {
+      console.log("✅ Pet deleted successfully!");
+      setSnackbar({
+        visible: true,
+        message: "✅ Pet deleted successfully!",
+        isError: false,
+      });
+      await fetchPets(); // Refresh the pets list
+    }
   };
 
   if (loading) {
