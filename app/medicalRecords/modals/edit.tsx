@@ -18,6 +18,7 @@ export default function EditMedicalRecordModal() {
   const { id } = useLocalSearchParams();
   const { colors } = useTheme();
 
+  const [title, setTitle] = useState(""); // <-- 🆕 Title
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function EditMedicalRecordModal() {
       if (error) {
         console.error("❌ Error fetching record:", error.message);
       } else if (data) {
+        setTitle(data.title || ""); // <-- 🆕 Set Title
         setDescription(data.description || "");
         setDate(data.date_of_record || "");
         setFileUrl(data.file_url || null);
@@ -88,7 +90,8 @@ export default function EditMedicalRecordModal() {
   };
 
   const handleSubmit = async () => {
-    if (!description || !date) {
+    if (!title || !description || !date) {
+      // <-- ✅ Validate Title
       setSnackbar({
         visible: true,
         message: "❌ Please fill all fields!",
@@ -99,13 +102,18 @@ export default function EditMedicalRecordModal() {
 
     setLoading(true);
 
+    const payload = {
+      title: title.trim(),
+      description: description.trim(),
+      date_of_record: date,
+      file_url: fileUrl || null,
+    };
+
+    console.log("🛠 Payload sending to Supabase (edit):", payload);
+
     const { error } = await supabase
       .from("medical_records")
-      .update({
-        description,
-        date_of_record: date,
-        file_url: fileUrl,
-      })
+      .update(payload)
       .eq("id", recordId);
 
     setLoading(false);
@@ -154,18 +162,26 @@ export default function EditMedicalRecordModal() {
       </Text>
 
       <TextInput
+        label="Title"
+        value={title}
+        onChangeText={setTitle}
+        style={{ marginBottom: 12 }}
+      />
+
+      <TextInput
         label="Description"
         value={description}
         onChangeText={setDescription}
         style={{ marginBottom: 12 }}
       />
 
+      {/* 📅 Date Input */}
       {Platform.OS === "web" ? (
         <TextInput
           label="Date (YYYY-MM-DD)"
           value={date}
           onChangeText={setDate}
-          placeholder="e.g., 2024-04-16"
+          placeholder="e.g., 2025-04-13"
           style={{ marginBottom: 12 }}
         />
       ) : (
@@ -189,6 +205,7 @@ export default function EditMedicalRecordModal() {
         </>
       )}
 
+      {/* 📄 File Upload / 📸 Take Photo */}
       <Button
         mode="outlined"
         onPress={handleFileUpload}
@@ -205,6 +222,7 @@ export default function EditMedicalRecordModal() {
         📸 Take a Picture
       </Button>
 
+      {/* 📸 Preview */}
       {fileUrl ? (
         <Image
           source={{ uri: fileUrl }}
@@ -217,6 +235,7 @@ export default function EditMedicalRecordModal() {
         </Text>
       )}
 
+      {/* ✅ Save / ❌ Cancel */}
       <Button
         mode="contained"
         onPress={handleSubmit}

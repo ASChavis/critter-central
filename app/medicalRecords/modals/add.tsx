@@ -18,6 +18,7 @@ export default function AddMedicalRecordModal() {
   const { petId } = useLocalSearchParams();
   const { colors } = useTheme();
 
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [fileUri, setFileUri] = useState<string | null>(null);
@@ -64,7 +65,7 @@ export default function AddMedicalRecordModal() {
   };
 
   const handleSubmit = async () => {
-    if (!description || !date) {
+    if (!title || !description || !date) {
       setSnackbar({
         visible: true,
         message: "❌ Please fill all fields!",
@@ -77,14 +78,17 @@ export default function AddMedicalRecordModal() {
 
     setLoading(true);
 
-    const { error } = await supabase.from("medical_records").insert([
-      {
-        pet_id: petIdString,
-        description,
-        date_of_record: date,
-        fileUri: fileUri || null,
-      },
-    ]);
+    const payload = {
+      pet_id: petIdString,
+      title: title.trim(),
+      description: description.trim(),
+      date_of_record: date,
+      file_url: fileUri || null,
+    };
+
+    console.log("🛠 Payload sending to Supabase:", payload);
+
+    const { error } = await supabase.from("medical_records").insert([payload]);
 
     setLoading(false);
 
@@ -132,6 +136,13 @@ export default function AddMedicalRecordModal() {
       </Text>
 
       <TextInput
+        label="Title"
+        value={title}
+        onChangeText={setTitle}
+        style={{ marginBottom: 12 }}
+      />
+
+      <TextInput
         label="Description"
         value={description}
         onChangeText={setDescription}
@@ -144,7 +155,7 @@ export default function AddMedicalRecordModal() {
           label="Date (YYYY-MM-DD)"
           value={date}
           onChangeText={setDate}
-          placeholder="e.g., 2024-04-16"
+          placeholder="e.g., 2025-04-13"
           style={{ marginBottom: 12 }}
         />
       ) : (
