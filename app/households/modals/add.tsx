@@ -2,13 +2,11 @@ import { useState } from "react";
 import { View } from "react-native";
 import { Text, TextInput, Button, Snackbar } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useData } from "../../context/DataContext";
-import { useAuth } from "../../context/AuthContext";
-import { supabase } from "../../lib/supabase/supabase";
+import { useAuth } from "../../../context/AuthContext";
+import { supabase } from "../../../lib/supabase/supabase";
 
 export default function AddHouseholdModal() {
   const router = useRouter();
-  const { refreshData } = useData();
   const { user } = useAuth();
 
   const [name, setName] = useState("");
@@ -62,8 +60,6 @@ export default function AddHouseholdModal() {
       setLoading(false);
       return;
     }
-
-    await refreshData();
 
     console.log("✅ Household added successfully!");
 

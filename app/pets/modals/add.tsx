@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 import {
   Text,
   TextInput,
@@ -9,8 +9,9 @@ import {
   Menu,
 } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useData } from "../../context/DataContext";
-import { subYears, subMonths } from "date-fns"; // Helper for date math
+import { useData } from "../../../context/DataContext";
+import { subYears, subMonths } from "date-fns";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const speciesOptions = ["Dog", "Cat", "Rabbit", "Bird", "Reptile", "Other"];
 
@@ -31,6 +32,8 @@ export default function AddPetModal() {
     "age"
   );
   const [ageUnit, setAgeUnit] = useState<"years" | "months">("years");
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     visible: false,
@@ -56,8 +59,7 @@ export default function AddPetModal() {
 
   const isRealDate = (dateStr: string) => {
     const [year, month, day] = dateStr.split("-").map(Number);
-
-    const date = new Date(year, month - 1, day); // month is 0-indexed
+    const date = new Date(year, month - 1, day);
     return (
       date.getFullYear() === year &&
       date.getMonth() === month - 1 &&
@@ -151,7 +153,7 @@ export default function AddPetModal() {
         isError: false,
       });
 
-      // Clear form after success
+      // Clear form
       setName("");
       setSpecies("");
       setBreed("");
@@ -188,6 +190,7 @@ export default function AddPetModal() {
         Add a New Pet
       </Text>
 
+      {/* Name */}
       <TextInput
         label="Pet Name"
         value={name}
@@ -230,7 +233,7 @@ export default function AddPetModal() {
         </Menu>
       </View>
 
-      {/* Custom species input if "Other" selected */}
+      {/* Custom species input */}
       {customSpeciesMode && (
         <TextInput
           label="Enter Custom Species"
@@ -240,6 +243,7 @@ export default function AddPetModal() {
         />
       )}
 
+      {/* Breed */}
       <TextInput
         label="Breed"
         value={breed}
@@ -247,7 +251,7 @@ export default function AddPetModal() {
         style={{ marginBottom: 12 }}
       />
 
-      {/* Toggle between Age and Birthdate */}
+      {/* Toggle Age vs Birthdate */}
       <View
         style={{
           flexDirection: "row",
@@ -307,15 +311,44 @@ export default function AddPetModal() {
 
       {/* Birthdate Entry */}
       {birthdateMode === "birthdate" && (
-        <TextInput
-          label="Exact Birthdate (YYYY-MM-DD)"
-          value={birthdateInput}
-          onChangeText={(text) => setBirthdateInput(autoFormatDate(text))}
-          placeholder="e.g., 2024-04-15"
-          style={{ marginBottom: 12 }}
-        />
+        <>
+          <TextInput
+            label="Exact Birthdate (YYYY-MM-DD)"
+            value={birthdateInput}
+            onChangeText={(text) => setBirthdateInput(autoFormatDate(text))}
+            placeholder="e.g., 2024-04-15"
+            style={{ marginBottom: 12 }}
+          />
+          <Button
+            mode="outlined"
+            onPress={() => setShowDatePicker(true)}
+            style={{ marginBottom: 12 }}
+          >
+            📅 Pick Birthdate from Calendar
+          </Button>
+          {showDatePicker && Platform.OS !== "web" && (
+            <DateTimePicker
+              value={birthdateInput ? new Date(birthdateInput) : new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  const year = selectedDate.getFullYear();
+                  const month = String(selectedDate.getMonth() + 1).padStart(
+                    2,
+                    "0"
+                  );
+                  const day = String(selectedDate.getDate()).padStart(2, "0");
+                  setBirthdateInput(`${year}-${month}-${day}`);
+                }
+              }}
+            />
+          )}
+        </>
       )}
 
+      {/* Submit Buttons */}
       <Button
         mode="contained"
         onPress={handleSubmit}
@@ -328,20 +361,19 @@ export default function AddPetModal() {
 
       <Button
         mode="outlined"
-        onPress={() => router.back()}
+        onPress={() => router.push(`/households/${householdId}`)}
         disabled={loading}
         style={{ marginVertical: 8 }}
       >
         Cancel
       </Button>
 
+      {/* Snackbar */}
       <Snackbar
         visible={snackbar.visible}
         onDismiss={handleSnackbarDismiss}
         duration={2000}
-        style={{
-          backgroundColor: snackbar.isError ? "red" : "green",
-        }}
+        style={{ backgroundColor: snackbar.isError ? "red" : "green" }}
       >
         {snackbar.message}
       </Snackbar>
