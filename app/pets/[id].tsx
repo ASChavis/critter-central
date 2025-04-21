@@ -3,6 +3,7 @@ import { View, FlatList, Pressable } from "react-native";
 import { Text, ActivityIndicator, Button, useTheme } from "react-native-paper";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { supabase } from "../../lib/supabase/supabase";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 interface Pet {
   id: string;
@@ -115,6 +116,15 @@ export default function PetDetailsScreen() {
         )}
         ListEmptyComponent={<Text>No medical records found.</Text>}
       />
+            <Button
+        mode="contained"
+        onPress={() =>
+          router.push(`/medicalRecords/modals/calendar}`)
+        }
+        style={{ marginTop: 16 }}
+      >
+        <AntDesign name="calendar" size={24} color="black" />  Daily Log
+      </Button>
 
       <Button
         mode="contained"
