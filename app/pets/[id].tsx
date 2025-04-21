@@ -119,7 +119,7 @@ export default function PetDetailsScreen() {
             <Button
         mode="contained"
         onPress={() =>
-          router.push(`/medicalRecords/modals/calendar}`)
+          router.push(`/dailyLog/modals/view?petId=${pet.id}`)
         }
         style={{ marginTop: 16 }}
       >
