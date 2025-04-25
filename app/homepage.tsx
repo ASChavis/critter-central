@@ -1,5 +1,5 @@
 import { useAuth } from "../context/AuthContext";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { Text, Button, useTheme, ActivityIndicator } from "react-native-paper";
 import { useEffect } from "react";
@@ -7,13 +7,14 @@ import { useEffect } from "react";
 export default function HomePage() {
   const { user } = useAuth();
   const router = useRouter();
+  const segments = useSegments();
   const { colors } = useTheme();
 
   useEffect(() => {
-    if (!user) {
+    if (segments.length > 0 && !user) {
       router.replace("/login");
     }
-  }, [user]);
+  }, [user, segments]);
 
   if (!user) {
     return <ActivityIndicator animating={true} size="large" />;
