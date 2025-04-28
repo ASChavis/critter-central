@@ -404,7 +404,7 @@ export default function PetDetailsScreen() {
           )}
           ListEmptyComponent={<Text>No medical records found.</Text>}
         />
-                       <Button
+                <Button
           mode="contained"
           onPress={() =>
             router.push(`/dailyLog/modals/view?petId=${pet?.id}`)
@@ -412,7 +412,7 @@ export default function PetDetailsScreen() {
           style={{ marginTop: 16 }}
         >
           📅 Daily Log
-        </Button> 
+        </Button>        
 
         <Button
           mode="contained"
