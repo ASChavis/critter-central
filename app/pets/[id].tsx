@@ -307,9 +307,5 @@ export default function PetDetailsScreen() {
   </Snackbar>
 </ScrollView>
 
-      >
-        {snackbar}
-      </Snackbar>
-    </ScrollView>
   );
 }
