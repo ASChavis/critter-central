@@ -7,10 +7,6 @@ const Index = () => {
   const router = useRouter();
 
   return (
-    // <ImageBackground
-    //   source={require("../assets/backgroundImg.jpg")}
-    //   style={styles.background}
-    // >
     <View style={styles.overlay}>
       <Text style={styles.title}>Welcome to Critter Central</Text>
       <Text style={styles.subtitle}>
@@ -41,7 +37,6 @@ const Index = () => {
         Contact Us
       </Button>
     </View>
-    // </ImageBackground>
   );
 };
 
