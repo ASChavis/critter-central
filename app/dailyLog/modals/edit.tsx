@@ -24,9 +24,17 @@ export default function EditTaskScreen() {
   }, [id]);
 
   const fetchTask = async () => {
-    const { data, error } = await supabase.from("daily_logs").select("*").eq("id", id).single();
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .select("*")
+      .eq("id", id)
+      .single();
     if (error) {
-      setSnackbar({ visible: true, message: "Error loading task", isError: true });
+      setSnackbar({
+        visible: true,
+        message: "Error loading task",
+        isError: true,
+      });
     } else if (data) {
       setTitle(data.title);
       setDescription(data.description || "");
@@ -37,7 +45,11 @@ export default function EditTaskScreen() {
 
   const handleUpdate = async () => {
     if (!title.trim()) {
-      setSnackbar({ visible: true, message: "Title is required.", isError: true });
+      setSnackbar({
+        visible: true,
+        message: "Title is required.",
+        isError: true,
+      });
       return;
     }
 
@@ -51,7 +63,11 @@ export default function EditTaskScreen() {
     setSaving(false);
 
     if (error) {
-      setSnackbar({ visible: true, message: "Failed to update task.", isError: true });
+      setSnackbar({
+        visible: true,
+        message: "Failed to update task.",
+        isError: true,
+      });
     } else {
       setSnackbar({ visible: true, message: "Task updated!", isError: false });
       setTimeout(() => {
@@ -60,10 +76,33 @@ export default function EditTaskScreen() {
     }
   };
 
+  const handleDelete = async () => {
+    const { error } = await supabase.from("daily_logs").delete().eq("id", id);
+
+    if (error) {
+      setSnackbar({
+        visible: true,
+        message: "Failed to delete task.",
+        isError: true,
+      });
+    } else {
+      setSnackbar({
+        visible: true,
+        message: "Task deleted.",
+        isError: false,
+      });
+      setTimeout(() => {
+        router.replace(`/dailyLog/modals/view?petId=${petId}`);
+      }, 1000);
+    }
+  };
+
   if (loading) return <Text style={{ padding: 20 }}>Loading...</Text>;
 
   return (
-    <ScrollView style={{ flex: 1, padding: 16, backgroundColor: colors.background }}>
+    <ScrollView
+      style={{ flex: 1, padding: 16, backgroundColor: colors.background }}
+    >
       <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
         Edit Task for {date}
       </Text>
@@ -72,22 +111,55 @@ export default function EditTaskScreen() {
         placeholder="Title"
         value={title}
         onChangeText={setTitle}
-        style={{ borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 12, borderRadius: 6 }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#ccc",
+          padding: 8,
+          marginBottom: 12,
+          borderRadius: 6,
+        }}
       />
       <TextInput
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
         multiline
-        style={{ borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 12, borderRadius: 6, minHeight: 60 }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#ccc",
+          padding: 8,
+          marginBottom: 12,
+          borderRadius: 6,
+          minHeight: 60,
+        }}
       />
 
-      <Button mode="contained" onPress={handleUpdate} loading={saving} disabled={saving}>
+      <Button
+        mode="contained"
+        onPress={handleUpdate}
+        loading={saving}
+        disabled={saving}
+      >
         Update Task
       </Button>
 
-      <Button mode="outlined" onPress={() => router.back()} disabled={saving} style={{ marginTop: 12 }}>
+      <Button
+        mode="outlined"
+        onPress={() => router.back()}
+        disabled={saving}
+        style={{ marginTop: 12 }}
+      >
         Cancel
+      </Button>
+
+      <Button
+        mode="contained"
+        buttonColor="red"
+        onPress={handleDelete}
+        style={{ marginTop: 12 }}
+        disabled={saving}
+      >
+        ❌ Delete Task
       </Button>
 
       <Snackbar

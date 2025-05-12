@@ -33,7 +33,7 @@ export default function AddTaskScreen() {
     {
       pet_id: petId,
       title: title.trim(),
-      description: description.trim() || null, // Optional field
+      description: description.trim() || null, 
       date: date,
     },
   ]);

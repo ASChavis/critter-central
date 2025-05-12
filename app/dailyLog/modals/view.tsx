@@ -1,13 +1,10 @@
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, TouchableOpacity } from "react-native";
 import { Text, Button, useTheme } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import { Calendar } from "react-native-calendars";
 import { supabase } from "../../../lib/supabase/supabase";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
-import { TouchableOpacity } from "react-native";
-
 
 export default function ViewCalendarTaskModal() {
   const router = useRouter();
@@ -17,18 +14,18 @@ export default function ViewCalendarTaskModal() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-useFocusEffect(
-  useCallback(() => {
-    fetchAllTasks();
-  }, [])
-);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAllTasks();
+    }, [])
+  );
 
   const fetchAllTasks = async () => {
-   const { data, error } = await supabase
-  .from("daily_logs")
-  .select("*")
-  .eq("pet_id", petId)
-  .order("date", { ascending: true }); 
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .select("*")
+      .eq("pet_id", petId)
+      .order("date", { ascending: true });
     if (error) {
       console.warn("⚠️ Error loading tasks:", error.message);
     } else {
@@ -66,7 +63,9 @@ useFocusEffect(
   }
 
   return (
-    <ScrollView style={{ flex: 1, padding: 16, backgroundColor: colors.background }}>
+    <ScrollView
+      style={{ flex: 1, padding: 16, backgroundColor: colors.background }}
+    >
       <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
         📅 Calendar Tasks
       </Text>
@@ -88,25 +87,66 @@ useFocusEffect(
           <Text>No tasks found.</Text>
         ) : (
           tasks.map((task) => (
-<TouchableOpacity onPress={() => router.push(`/dailyLog/modals/edit?id=${task.id}&petId=${petId}`)}>
-  <View
-    key={task.id}
-    style={{
-      padding: 12,
-      borderBottomWidth: 1,
-      borderColor: "#ddd",
-      backgroundColor: "#f8f9fa",
-      marginBottom: 8,
-      borderRadius: 6,
-    }}
-  >
-    <Text style={{ fontSize: 16, fontWeight: "bold" }}>{task.title}</Text>
-    <Text style={{ color: "gray", marginTop: 4 }}>📅 {task.date}</Text>
-    {task.description ? (
-      <Text style={{ marginTop: 4 }}>{task.description}</Text>
-    ) : null}
-  </View>
-</TouchableOpacity>
+            <View
+              key={task.id}
+              style={{
+                padding: 12,
+                borderBottomWidth: 1,
+                borderColor: "#ddd",
+                backgroundColor: "#f8f9fa",
+                marginBottom: 8,
+                borderRadius: 6,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() =>
+                  router.push(
+                    `/dailyLog/modals/edit?id=${task.id}&petId=${petId}`
+                  )
+                }
+              >
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {task.title}
+                </Text>
+                <Text style={{ color: "gray", marginTop: 4 }}>
+                  📅 {task.date}
+                </Text>
+                {task.description ? (
+                  <Text style={{ marginTop: 4 }}>{task.description}</Text>
+                ) : null}
+              </TouchableOpacity>
+
+              <View style={{ flexDirection: "row", marginTop: 8 }}>
+                <Button
+                  mode="outlined"
+                  onPress={() =>
+                    router.push(
+                      `/dailyLog/modals/edit?id=${task.id}&petId=${petId}`
+                    )
+                  }
+                  style={{ marginRight: 8 }}
+                >
+                  📝 Edit
+                </Button>
+                <Button
+                  mode="outlined"
+                  onPress={async () => {
+                    const { error } = await supabase
+                      .from("daily_logs")
+                      .delete()
+                      .eq("id", task.id);
+
+                    if (error) {
+                      console.warn("❌ Failed to delete task:", error.message);
+                    } else {
+                      setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                    }
+                  }}
+                >
+                  ❌ Delete
+                </Button>
+              </View>
+            </View>
           ))
         )}
       </View>
