@@ -4,6 +4,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { supabase } from "../../../lib/supabase/supabase";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+import { TouchableOpacity } from "react-native";
+
 
 export default function ViewCalendarTaskModal() {
   const router = useRouter();
@@ -13,14 +17,18 @@ export default function ViewCalendarTaskModal() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     fetchAllTasks();
-  }, []);
+  }, [])
+);
 
   const fetchAllTasks = async () => {
-   const { data, error } = await supabase.from("daily_logs")
-    .select("*")
-    .eq("pet_id", petId);
+   const { data, error } = await supabase
+  .from("daily_logs")
+  .select("*")
+  .eq("pet_id", petId)
+  .order("date", { ascending: true }); 
     if (error) {
       console.warn("⚠️ Error loading tasks:", error.message);
     } else {
@@ -80,27 +88,25 @@ export default function ViewCalendarTaskModal() {
           <Text>No tasks found.</Text>
         ) : (
           tasks.map((task) => (
-            <View
-              key={task.id}
-              style={{
-                padding: 12,
-                borderBottomWidth: 1,
-                borderColor: "#ddd",
-                backgroundColor: "#f8f9fa",
-                marginBottom: 8,
-                borderRadius: 6,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                {task.title}
-              </Text>
-              <Text style={{ color: "gray", marginTop: 4 }}>
-                📅 {task.date}
-              </Text>
-              {task.description ? (
-                <Text style={{ marginTop: 4 }}>{task.description}</Text>
-              ) : null}
-            </View>
+<TouchableOpacity onPress={() => router.push(`/dailyLog/modals/edit?id=${task.id}&petId=${petId}`)}>
+  <View
+    key={task.id}
+    style={{
+      padding: 12,
+      borderBottomWidth: 1,
+      borderColor: "#ddd",
+      backgroundColor: "#f8f9fa",
+      marginBottom: 8,
+      borderRadius: 6,
+    }}
+  >
+    <Text style={{ fontSize: 16, fontWeight: "bold" }}>{task.title}</Text>
+    <Text style={{ color: "gray", marginTop: 4 }}>📅 {task.date}</Text>
+    {task.description ? (
+      <Text style={{ marginTop: 4 }}>{task.description}</Text>
+    ) : null}
+  </View>
+</TouchableOpacity>
           ))
         )}
       </View>
