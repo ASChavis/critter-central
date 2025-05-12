@@ -1,6 +1,6 @@
-import { View, ScrollView, TextInput } from "react-native";
+import { View, ScrollView } from "react-native";
 import { Text, Button, useTheme } from "react-native-paper";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { supabase } from "../../../lib/supabase/supabase";
@@ -8,23 +8,19 @@ import { supabase } from "../../../lib/supabase/supabase";
 export default function ViewCalendarTaskModal() {
   const router = useRouter();
   const { colors } = useTheme();
-
+  const { petId } = useLocalSearchParams();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-  // Form state
-  const [formDate, setFormDate] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
 
   useEffect(() => {
     fetchAllTasks();
   }, []);
 
   const fetchAllTasks = async () => {
-    const { data, error } = await supabase.from("calendar_tasks").select("*");
+   const { data, error } = await supabase.from("daily_logs")
+    .select("*")
+    .eq("pet_id", petId);
     if (error) {
       console.warn("⚠️ Error loading tasks:", error.message);
     } else {
@@ -33,53 +29,19 @@ export default function ViewCalendarTaskModal() {
     setLoading(false);
   };
 
-  const fetchTasksForDate = async (date: string) => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("calendar_tasks")
-      .select("*")
-      .eq("due_date", date);
-    if (error) {
-      console.warn("⚠️ Error fetching tasks for date:", error.message);
-    } else {
-      setTasks(data || []);
-    }
-    setLoading(false);
-  };
-
   const handleDateChange = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
-    setFormDate(day.dateString); // sync form field
-    fetchTasksForDate(day.dateString);
-  };
-
-  const handleCreateTask = async () => {
-    if (!formDate || !newTitle) return;
-    setCreating(true);
-
-    const { error } = await supabase.from("calendar_tasks").insert([
-      {
-        due_date: formDate,
-        title: newTitle,
-        description: newDescription,
-      },
-    ]);
-
-    if (error) {
-      console.error("❌ Error creating task:", error.message);
+    if (petId) {
+      router.push(`/dailyLog/modals/add?date=${day.dateString}&petId=${petId}`);
     } else {
-      setNewTitle("");
-      setNewDescription("");
-      fetchTasksForDate(formDate); // refresh with new task
+      console.warn("No petId found");
     }
-
-    setCreating(false);
   };
 
   const markedDates = tasks.reduce((acc, task) => {
-    if (task.due_date) {
-      acc[task.due_date] = {
-        ...acc[task.due_date],
+    if (task.date) {
+      acc[task.date] = {
+        ...acc[task.date],
         marked: true,
         dotColor: colors.primary,
       };
@@ -107,82 +69,46 @@ export default function ViewCalendarTaskModal() {
         style={{ marginBottom: 24, borderRadius: 8 }}
       />
 
-      {selectedDate && (
-        <View style={{ marginBottom: 32 }}>
-          <Text variant="titleMedium" style={{ marginBottom: 8 }}>
-            🗂 Tasks for {selectedDate}
-          </Text>
+      <View style={{ marginTop: 24 }}>
+        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+          📋 All Tasks
+        </Text>
 
-          {loading ? (
-            <Text>Loading tasks...</Text>
-          ) : tasks.length === 0 ? (
-            <Text>No tasks yet.</Text>
-          ) : (
-            tasks.map((task, index) => (
-              <View key={task.id} style={{ marginBottom: 12 }}>
-                <Text variant="titleSmall">{index + 1}. {task.title}</Text>
-                {task.description ? <Text>{task.description}</Text> : null}
-              </View>
-            ))
-          )}
-
-          <View style={{ marginTop: 24 }}>
-            <Text variant="titleMedium">➕ Add New Task</Text>
-
-            <TextInput
-              placeholder="Due Date (YYYY-MM-DD)"
-              value={formDate}
-              onChangeText={setFormDate}
+        {loading ? (
+          <Text>Loading tasks...</Text>
+        ) : tasks.length === 0 ? (
+          <Text>No tasks found.</Text>
+        ) : (
+          tasks.map((task) => (
+            <View
+              key={task.id}
               style={{
-                borderWidth: 1,
-                borderColor: "#ccc",
-                padding: 8,
+                padding: 12,
+                borderBottomWidth: 1,
+                borderColor: "#ddd",
+                backgroundColor: "#f8f9fa",
                 marginBottom: 8,
                 borderRadius: 6,
               }}
-            />
-            <TextInput
-              placeholder="Title"
-              value={newTitle}
-              onChangeText={setNewTitle}
-              style={{
-                borderWidth: 1,
-                borderColor: "#ccc",
-                padding: 8,
-                marginBottom: 8,
-                borderRadius: 6,
-              }}
-            />
-            <TextInput
-              placeholder="Description (optional)"
-              value={newDescription}
-              onChangeText={setNewDescription}
-              multiline
-              style={{
-                borderWidth: 1,
-                borderColor: "#ccc",
-                padding: 8,
-                marginBottom: 12,
-                borderRadius: 6,
-                minHeight: 60,
-              }}
-            />
-            <Button
-              mode="contained"
-              onPress={handleCreateTask}
-              disabled={creating}
-              loading={creating}
             >
-              Add Task
-            </Button>
-          </View>
-        </View>
-      )}
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                {task.title}
+              </Text>
+              <Text style={{ color: "gray", marginTop: 4 }}>
+                📅 {task.date}
+              </Text>
+              {task.description ? (
+                <Text style={{ marginTop: 4 }}>{task.description}</Text>
+              ) : null}
+            </View>
+          ))
+        )}
+      </View>
 
       <Button
         mode="outlined"
         onPress={() => router.back()}
-        style={{ marginTop: 8 }}
+        style={{ marginTop: 24 }}
       >
         Close
       </Button>
