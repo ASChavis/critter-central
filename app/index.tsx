@@ -7,41 +7,41 @@ const Index = () => {
   const router = useRouter();
 
   return (
-    <ImageBackground
-      source={require("../assets/backgroundImg.jpg")}
-      style={styles.background}
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Welcome to Critter Central</Text>
-        <Text style={styles.subtitle}>
-          Your go-to solution for managing pet records with ease.
-        </Text>
+    // <ImageBackground
+    //   source={require("../assets/backgroundImg.jpg")}
+    //   style={styles.background}
+    // >
+    <View style={styles.overlay}>
+      <Text style={styles.title}>Welcome to Critter Central</Text>
+      <Text style={styles.subtitle}>
+        Your go-to solution for managing pet records with ease.
+      </Text>
 
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.infoText}>
-              Manage your pet's health records in one place. Secure, fast, and
-              easy to use.
-            </Text>
-          </Card.Content>
-        </Card>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.infoText}>
+            Manage your pet's health records in one place. Secure, fast, and
+            easy to use.
+          </Text>
+        </Card.Content>
+      </Card>
 
-        <Button
-          mode="contained"
-          onPress={() => router.push("/login")}
-          style={styles.button}
-        >
-          Login
-        </Button>
-        <Button
-          mode="outlined"
-          onPress={() => router.push("/contact")}
-          style={styles.button}
-        >
-          Contact Us
-        </Button>
-      </View>
-    </ImageBackground>
+      <Button
+        mode="contained"
+        onPress={() => router.push("/login")}
+        style={styles.button}
+      >
+        Login
+      </Button>
+      <Button
+        mode="outlined"
+        onPress={() => router.push("/contact")}
+        style={styles.button}
+      >
+        Contact Us
+      </Button>
+    </View>
+    // </ImageBackground>
   );
 };
 

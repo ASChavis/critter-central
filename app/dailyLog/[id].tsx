@@ -310,7 +310,7 @@ export default function PetDetailsScreen() {
 
                     <MenuDropdown
                       label="Category"
-                      value={draft.category}
+                      value={draft.category ?? ""}
                       options={CATEGORY_OPTIONS}
                       onChange={(selected) =>
                         setDraftReminders((prev) => ({
@@ -404,15 +404,13 @@ export default function PetDetailsScreen() {
           )}
           ListEmptyComponent={<Text>No medical records found.</Text>}
         />
-                <Button
+        <Button
           mode="contained"
-          onPress={() =>
-            router.push(`/dailyLog/modals/view?petId=${pet?.id}`)
-          }
+          onPress={() => router.push(`/dailyLog/modals/view?petId=${pet?.id}`)}
           style={{ marginTop: 16 }}
         >
           📅 Daily Log
-        </Button>        
+        </Button>
 
         <Button
           mode="contained"
