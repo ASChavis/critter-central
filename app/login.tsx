@@ -5,14 +5,24 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
-import { Button, Card, Snackbar, Text, TextInput } from "react-native-paper";
+import {
+  Button,
+  Card,
+  Snackbar,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
+import SvgIcon from "../helper/SvgIcon";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
+  const { colors } = useTheme();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -37,13 +47,14 @@ export default function LoginScreen() {
     }
     setLoading(false);
   };
+  const logoPng = require("../assets/Logo.png");
 
   return (
-    <ImageBackground
-      source={require("../assets/backgroundImg.jpg")}
-      style={styles.background}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.overlay}>
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <SvgIcon icon="logo" width={250} height={250} />
+        </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ width: "100%" }}
@@ -118,7 +129,7 @@ export default function LoginScreen() {
       >
         {snackbar.message}
       </Snackbar>
-    </ImageBackground>
+    </View>
   );
 }
 
