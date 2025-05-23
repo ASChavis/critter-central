@@ -16,6 +16,9 @@
     "lib/supabase",
     "types/types.ts",
     "types/auth.ts",
-    "data/mockData.ts"
+    "data/mockData.ts",
+    "src/**/*",
+    "helper",
+    "helper/iconMap.ts"
   ]
 }

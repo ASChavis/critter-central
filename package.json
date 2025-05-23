@@ -7,7 +7,9 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "sync-svgs": "copyfiles -u 1 assets/icons/*.svg public/",
+    "postinstall": "npm run sync-svgs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -29,12 +31,15 @@
     "react-native-paper": "^5.13.1",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
+    "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.13"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@expo/cli": "^0.22.24",
     "@types/react": "~18.3.12",
+    "copyfiles": "^2.4.1",
+    "react-native-svg-transformer": "^1.5.1",
     "typescript": "^5.3.3"
   },
   "private": true
