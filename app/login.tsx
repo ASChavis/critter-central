@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-} from "react-native";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -16,6 +9,7 @@ import {
   Text,
   TextInput,
   useTheme,
+  Surface,
 } from "react-native-paper";
 import SvgIcon from "../helper/SvgIcon";
 
@@ -49,75 +43,53 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={styles.overlay}>
-        <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <SvgIcon icon="logo" width={250} height={250} />
-        </View>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={{ width: "100%" }}
-        >
-          <Text style={styles.title}>Login</Text>
-          <Card style={styles.card}>
-            <Card.Content>
-              {/* Email Input */}
-              <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={styles.input}
-                theme={{
-                  colors: {
-                    background: "white",
-                    placeholder: "rgba(212, 163, 206, 0.7)",
-                  },
-                }}
-              />
-
-              {/* Password Input */}
-              <TextInput
-                label="Password"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                style={styles.input}
-                theme={{
-                  colors: {
-                    background: "white",
-                    placeholder: "rgba(212, 163, 206, 0.7)",
-                  },
-                }}
-              />
-
-              {/* Login Button */}
-              <Button
-                mode="contained"
-                onPress={handleLogin}
-                style={styles.button}
-                loading={loading}
-              >
-                Login
-              </Button>
-
-              {/* Navigate to Signup */}
-              <Button
-                mode="text"
-                onPress={() => router.push("/signup")}
-                style={{ marginTop: 12 }}
-              >
-                Don't have an account? Sign Up
-              </Button>
-            </Card.Content>
-          </Card>
-        </KeyboardAvoidingView>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <SvgIcon icon="logo" width={250} height={250} style={styles.mascot} />
       </View>
 
-      {/* Snackbar Toast */}
+      <Surface style={[styles.card, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.title, { color: colors.onSurface }]}>Login</Text>
+
+        <TextInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={[styles.input]}
+        />
+
+        <TextInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={[styles.input]}
+        />
+
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          style={styles.button}
+          loading={loading}
+          labelStyle={{ color: colors.onPrimary }}
+        >
+          Login
+        </Button>
+
+        <Button
+          mode="text"
+          onPress={() => router.push("/signup")}
+          style={{ marginTop: 12 }}
+        >
+          Don’t have an account? Sign Up
+        </Button>
+      </Surface>
+
       <Snackbar
         visible={snackbar.visible}
         onDismiss={() =>
@@ -128,45 +100,39 @@ export default function LoginScreen() {
       >
         {snackbar.message}
       </Snackbar>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
     padding: 20,
+    justifyContent: "center",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "white",
+  mascot: {
+    alignSelf: "center",
+    marginBottom: 16,
   },
   card: {
     width: "100%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 12,
+    maxWidth: 400,
+    padding: 24,
+    borderRadius: 16,
+    elevation: 3,
+    alignSelf: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 20,
+    textAlign: "center",
   },
   input: {
-    width: "100%",
-    marginBottom: 10,
-    backgroundColor: "transparent",
+    marginBottom: 16,
   },
   button: {
-    width: "100%",
-    marginTop: 10,
+    marginTop: 8,
+    borderRadius: 8,
   },
 });
