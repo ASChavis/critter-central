@@ -1,6 +1,6 @@
 import Logo from "../assets/Logo.svg";
 
-const LogoPng = require("../assets/LogoWeb.png");
+const LogoPng = require("../assets/Logo.png");
 
 export const ICONS = {
   logo: {

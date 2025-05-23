@@ -5,7 +5,7 @@ export const appTheme: MD3Theme = {
   colors: {
     ...DefaultTheme.colors,
     primary: "#AA60C8", // Main brand color
-    background: "#FFDFEF", // App background
+    background: "#CAEDFF", // App background
     surface: "#EABDE6", // Card and input backgrounds
     onSurface: "#D69ADE", // Text color
     onPrimary: "#FFFFFF", // Text color for buttons

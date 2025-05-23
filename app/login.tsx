@@ -47,7 +47,6 @@ export default function LoginScreen() {
     }
     setLoading(false);
   };
-  const logoPng = require("../assets/Logo.png");
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>

@@ -18,6 +18,7 @@
     "types/auth.ts",
     "data/mockData.ts",
     "src/**/*",
-    "helper"
+    "helper",
+    "helper/iconMap.ts"
   ]
 }
