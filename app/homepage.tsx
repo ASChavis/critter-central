@@ -1,8 +1,9 @@
 import { useAuth } from "../context/AuthContext";
 import { useRouter, useSegments } from "expo-router";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { Text, Button, useTheme, ActivityIndicator } from "react-native-paper";
 import { useEffect } from "react";
+import SvgIcon from "../helper/SvgIcon";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -22,15 +23,19 @@ export default function HomePage() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={styles.welcomeText}>Welcome back!</Text>
+      <Text style={styles.welcomeText}>✨ Welcome back! ✨</Text>
       <Text style={styles.emailText}>{user.email}</Text>
+
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <SvgIcon icon="mochi" width={250} height={250} />
+      </View>
 
       <Button
         mode="contained"
         onPress={() => router.push("/households")}
         style={styles.button}
       >
-        🏡 View Your Households
+        View Your Households
       </Button>
 
       <Button
@@ -38,7 +43,7 @@ export default function HomePage() {
         onPress={() => router.push(`/users/${user.id}`)}
         style={styles.button}
       >
-        👤 View Account Info
+        My Account Info
       </Button>
 
       {/* Optional: Add Logout Button */}
